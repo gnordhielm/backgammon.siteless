@@ -23,7 +23,7 @@ If I make it to my strech goals, I will use `Firebase` as a simple database solu
 ## Process 
 
 * [Trello](https://trello.com/b/TF5bGnYn/backgammon)
-* [Game in progress](https://github.com/gnordhielm/backgammon)
+* [Game in progress](https://gnordhielm.github.io/backgammon/)
 
 <img src="./assets/scratchwork.jpg" style="width: 150px;">
 <img src="./assets/wireframes.jpg" style="width: 150px;">
