@@ -27,3 +27,12 @@ If I make it to my strech goals, I will use `Firebase` as a simple database solu
 
 <img src="./assets/scratchwork.jpg" style="width: 150px;">
 <img src="./assets/wireframes.jpg" style="width: 150px;">
+
+<img src="./assets/bk-piece.png" style="height: 20px;">
+<img src="./assets/bk-piece-home.png" style="height: 20px;">
+
+<img src="./assets/wh-piece.png" style="height: 20px;">
+<img src="./assets/wh-piece-home.png" style="height: 20px;">
+
+<img src="./assets/board.png" style="width: 150px;">
+
