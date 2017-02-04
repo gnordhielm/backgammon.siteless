@@ -1,0 +1,65 @@
+
+body {
+	width: 100%;
+	height: 100%;
+}
+
+#board {
+	background-image: url(../assets/board.png);
+	background-size: cover;
+	height: 425px;
+	width: 500px;
+}
+
+img.piece {
+	width: 35px;
+	position: absolute;
+}
+
+.point1, .point24 {
+	left: 458px;
+}
+
+.point2, .point23 {
+	left: 421px;
+}
+
+.point3, .point22 {
+	left: 385px;
+}
+
+.point4, .point21 {
+	left: 347px;
+}
+
+.point5, .point20 {
+	left: 311px;
+}
+
+.point6, .point19 {
+	left: 273px;
+}
+
+.point7, .point18 {
+	left: 212px;
+}
+
+.point8, .point17 {
+	left: 175px;
+}
+
+.point9, .point16 {
+	left: 137px;
+}
+
+.point10, .point15 {
+	left: 100px;
+}
+
+.point11, .point14 {
+	left: 64px;
+}
+
+.point12, .point13 {
+	left: 26px;
+}
