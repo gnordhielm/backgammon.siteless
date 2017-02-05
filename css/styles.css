@@ -5,16 +5,61 @@ body {
 }
 
 #board {
+	z-index: 1;
+	position: relative;
 	background-image: url(../assets/board.png);
 	background-size: cover;
-	height: 425px;
-	width: 500px;
+	height: 405px;
+    width: 536px;
+    padding: 10px;
 }
 
-img.piece {
+.piece {
+	z-index: 2;
 	width: 35px;
+	height: 35px;
 	position: absolute;
+	background-size: cover;
 }
+
+.black-piece {
+	background-image: url(../assets/bk-piece.png);
+}
+
+.white-piece {
+	background-image: url(../assets/wh-piece.png);
+}
+
+.active {
+	cursor: pointer;
+}
+
+.horizontal-spacer {
+	width: 7px;
+	height: 155px;
+	float: left;
+	opacity: 0.5;
+}
+
+.vertical-spacer{
+	width: 100%;
+	height: 14px;
+	clear: both;
+	opacity: 0.5;
+}
+.point {
+	height: 200px;
+	width: 37px;
+	float: left;
+}
+
+.home {
+	height: 200px;
+	width: 43px;
+	float: left;
+}
+
+/* hard-coded positioning info */
 
 .point1, .point24 {
 	left: 458px;
@@ -62,4 +107,52 @@ img.piece {
 
 .point12, .point13 {
 	left: 26px;
+}
+
+.top1 {
+	top: 20px;
+}
+
+.top2 {
+	top: 55px;
+}
+
+.top3 {
+	top: 90px;
+}
+
+.top4 {
+	top: 125px;
+}
+
+.top5 {
+	top: 160px;
+}
+
+.top6, .top7, .top8, .top9, .top10, .top11, .top12, .top13, .top14,  .top15 {
+	top: 25px;
+}
+
+.bottom1 {
+	top: 390px;
+}
+
+.bottom2 {
+	top: 355px;
+}
+
+.bottom3 {
+	top: 320px;
+}
+
+.bottom4 {
+	top: 285px;
+}
+
+.bottom5 {
+	top: 250px;
+}
+
+.bottom6, .bottom7, .bottom8, .bottom9, .bottom10, .bottom11, .bottom12, .bottom13, .bottom14,  .bottom15 {
+	top: 245px;
 }
