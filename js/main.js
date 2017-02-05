@@ -2,16 +2,21 @@ console.log('main.js connected')
 
 ///// Object Constructors /////
 
-function Player(name) {
+function Player(name, color) {
 	this.name = name
+	this.color = color
 	this.turn = false
 	this.dice = [] 
 }
 
 function Dice(){
-	this.value = null
+	this.value = NaN
 	this.roll = function () {
 		this.value = Math.floor(Math.random() * 6) + 1
+	}
+	this.declare = function() {
+		// returns a description of the dice's value as a string
+		return this.value.toString()
 	}
 }
 
@@ -19,7 +24,8 @@ function Piece(id, player) {
 	this.id = id
 	this.player = player
 	this.declare = function() {
-		return this.player.toString() + this.id.toString()
+		// returns a description of the piece's attributes as a string
+		return this.player.color + this.id.toString()
 	}
 }
 
@@ -59,46 +65,62 @@ function BackgammonBoard() {
 
 function Turn(player) {
 	this.player = player
-	this.resources = []
+	this.doubles = (player.dice[0].value === player.dice[1].value) ? true : false
+	this.availableResources = this.doubles ?
+					 [player.dice[0].value, player.dice[0].value, player.dice[0].value, player.dice[0].value] :
+					 [player.dice[0].value, player.dice[1].value]
+	this.usedResources = []
 	this.moves = []
 	this.undo = function() {
-		// pop the last move and visualize it
+		// pop the last move
 		console.log('undo')
 	}
+	this.preview = function() {
+		// makes a copy of the global board object in its current state
+		// changes to prevBoard do not affect the gloabal board. Thx jQuery.
+		var prevBoard = jQuery.extend(true, {}, board)
+		for (var move in this.moves) {
+			// catalogues all the resources used by all the moves
+			for (var i = 0; i < moves.resourcesUsed.length; i++) {
+				this.usedResources.push(moves.resourcesUsed[i])
+			// splices the given piece from a location, pushes it to the destination
+			var loc = prevBoard[move.location]
+			prevBoard[move.destination].push(loc.splice(loc.indexOf(piece)))
+			}
+		}
+		console.log('Previewing ' + this.moves.length.toString() + ' move(s).')
+		return prevBoard
+	}
 	this.commit = function() {
-		// alter the objects to reflect the moves
+		for (var move in this.moves) {
+		}
 		console.log('commit move')
 	}
 }
 
-function Move(player) {
-	this.player = player
-	this.location = ''
-	this.destination = ''
-	this.resourcesUsed = []
+function Move(piece) {
+	this.piece = piece // 'white11'
+	this.location = '' // 'point5'
+	this.destination = '' // 'whiteHome'
+	this.resourcesUsed = [] // [2, 3]
 }
 
-///// Game Setup Functions, Global Variables /////
+///// Game Setup Functions /////
 
 // NOTE: this code is written such that ANY function should be able to
-// alter the board, players, turnBuilder, or winner without explicity taking any of
+// alter the board, players, or winner without explicity taking any of
 // them as a parameter. In cases where a function could, at one time or
 // another, be applied to either player, "player" is specified as a parameter
-
-// player one is assigned to white, player two to black (as in chess)
-// the colors are used to refer back to the player once the piece is
-// separated from that player's array
 
 var board
 var white
 var black
-var winner
 
 function newGame(whiteName, blackName) {
-	white = new Player(whiteName)
+	white = new Player(whiteName, 'white')
 	white.dice = [new Dice(), new Dice()]
 	console.log(white.name + ' joined the game.')
-	black = new Player(blackName)
+	black = new Player(blackName, 'black')
 	black.dice = [new Dice(), new Dice()]
 	console.log(black.name + ' joined the game.')
 
@@ -109,7 +131,7 @@ function newGame(whiteName, blackName) {
 		whitePieces.push(new Piece(i, white))
 	}
 	var blackPieces = []
-	for (var i = 15; i >= 1; i--) {
+	for (var i = 1; i <= 15; i++) {
 		blackPieces.push(new Piece(i, black))
 	}
 	console.log('Created ' + blackPieces.length.toString() + ' black pieces and ' 
@@ -125,29 +147,66 @@ function newGame(whiteName, blackName) {
 	console.log('Assigned pieces to their point arrays.')
 }
 
-
 ///// Gameplay Functions /////
 
-// function rollDice(player) {
-// 	player.dice[0].roll()
-// 	player.dice[1].roll()
-// 	console.log(player.name + " rolled " + player.dice[0].value.toString() + " and " + player.dice[1].value.toString())
+function openingRoll() {
+	white.dice[0].roll()
+	console.log(white.name + ' rolled a ' + white.dice[0].declare())
+	black.dice[0].roll()
+	console.log(black.name + ' rolled a ' + black.dice[0].declare())
+	if (white.dice[0].value === black.dice[0].value) {
+		console.log('Tie on opening roll, rolling again...')
+ 		openingRoll()
+ 	} else if (white.dice[0].value > black.dice[0].value) {
+ 		white.dice[1].value = black.dice[0].value
+		white.turn = true
+		console.log(white.name + ' goes first.')
+		console.log('--------------------------')
+	} else if (white.dice[0].value < black.dice[0].value) {
+		black.dice[1].value = white.dice[0].value
+		black.turn = true
+		console.log(black.name + ' goes first.')
+		console.log('--------------------------')
+	} else {
+		console.log('!!! the openingRoll function is broken.')
+	}
+}
+
+// !!! Make this un-global before deployment
+var thisTurn
+
+function playTurn(player) {
+	thisTurn = new Turn(player) 
+	console.log('Created new turn for ' + player.name)
+	console.log(player.name + ' may move ' + thisTurn.availableResources.join(', '))
+	// getPlayable(thisTurn, 'pieces')
+	// getPlayable(thisTurn, 'points')
+
+}
+
+// function getPlayable(trn, type) {
+// 	var prev = trn.preview()
+// 	var playablePieces
+// 	var playablePoints
+// 	if (type === 'pieces') {
+
+// 	} else if (type === 'points') {
+
+// 	} else {
+// 		console.log('!!! passed ' + type.toString() + ' to getPlayable')
+// 	}
+
 // }
 
-// function openingRoll() {
-// 	rollDice(playerOne)
-// 	rollDice(playerTwo)
-// 	if (addDice(playerOne) === addDice(playerTwo)) {
-// 		console.log('Tie on opening roll.')
-// 		openingRoll()
-// 	} else if (addDice(playerOne) > addDice(playerTwo)) {
-// 		playerOne.turn = true
-// 		console.log(playerOne.name + ' wins opening roll.')
-// 	} else if (addDice(playerOne) < addDice(playerTwo)) {
-// 		playerTwo.turn = true
-// 		console.log(playerTwo.name + ' wins opening roll.')
-// 	}
-// }
+	// START HERE: how should event listeners be employed to create new move objects?
+	//1  I need to make an array of pieces the player can move with this setup
+	//2  I need to make an array of places the payer can move with this setup
+	//3  I need to make both clickable, and when they are clicked, they need to visualize 
+	// a move.
+	//4 I need to repeat the previous steps, now taking into account the changes the move 
+	// makes
+	// There is a distinction between previewing a move and committing it, though they are
+	// visually identical 
 
 // I need the ability to take pieces out of this array - which means I might need to 
 // make it a javascript object. Maybe I go through and apply a class to each point,
@@ -173,16 +232,12 @@ function newGame(whiteName, blackName) {
 
 // }
 
-// function nextTurn() {
-// 	player1.turn = !player1.turn
-// 	player2.turn = !player2.turn
-// }
+function nextTurn() {
+	white.turn = !white.turn
+	black.turn = !black.turn
+}
 
-// function fullTurn(player){
-// 	console.log(player.name + "'s full turn.")
-// }
-
-///// Boolean Functions /////
+///// Turn Building Functions /////
 
 // function hasDoubles(player) {
 // 	if (player.dice[0].value === player.dice[1].value) {
@@ -248,40 +303,97 @@ function newGame(whiteName, blackName) {
 ///////////////////////////////
 
 ///// Utility and Dev Functions /////
-// will be deleted in final code
-newGame('Gus', 'Nora')
+// will be commented out in final code
 
 
-// function visualizeBoard() {
-// 	for (var point in board.points) {
-// 		for (var i = 0; i < board.points[point].length; i++) {
-// 			var color = board.points[point][i].color
-// 			var id = board.points[point][i].id
-// 			var pointLoc = point <= 12 ? "bottom" : "top"
-// 			var pointPos = i + 1
-// 			$('#' + color + id.toString()).addClass('point' + point.toString() + ' ' + pointLoc + pointPos.toString())
-// 		}
-// 	}
-// }
+function runGame() {
+	newGame('Gus', 'Nora')
+	visualizeBoard(board)
+	openingRoll()
+	var activePlayer = whoseTurn()
+	playTurn(activePlayer)
+
+}
+
+runGame()
+
+
+function whoseTurn() {
+	if (white.turn) {
+		return white
+	} else if (black.turn) {
+		return black
+	} else {
+		console.log("!!! whoseTurn returned null.")
+		return null
+	}
+}
+
+function visualizeBoard(brd) {
+	for (var point in brd) {
+		for (var i in brd[point]) {
+			var $piece = $('#' + brd[point][i].declare())
+			$piece.css('left', gridLookup(point, i, 'left'))
+			$piece.css('top', gridLookup(point, i, 'top'))
+		}
+	}
+	console.log('!!! updated the DOM with visualizeboard')
+	console.log('--------------------------')
+}
+
+function gridLookup(point, position, axis) {
+	if (axis === 'left') {
+		var left = {
+			point1: 458, point24: 458, 
+			point2: 421, point23: 421, 
+			point3: 385, point22: 385, 
+			point4: 347, point21: 347, 
+			point5: 311, point20: 311, 
+			point6: 273, point19: 273, 
+			point7: 212, point18: 212, 
+			point8: 175, point17: 175, 
+			point9: 137, point16: 137, 
+			point10: 100, point15: 100, 
+			point11: 64, point14: 64, 
+			point12: 26, point13: 26, 
+			bar: 242,
+			blackHome: 515, whiteHome: 515
+		}
+		return left[point].toString() + 'px'
+	} else if (axis === 'top') {
+		var top
+		if (point.toString() === 'bar') {
+			top = {0: 228, 1: 211, 2: 188, 3: 171, 4: 154, 
+					5: 154, 6: 154, 7: 154, 8: 154, 9: 154, 
+					10: 154, 11: 154, 12: 154, 13: 154, 14: 154}
+		} else if (point.toString() === 'blackHome') {
+			top = {0: 20, 1: 28, 2: 36, 3: 44, 4: 52, 
+					5: 60, 6: 68, 7: 76, 8: 84, 9: 92, 
+					10: 100, 11: 108, 12: 116, 13: 124, 14: 132}
+		} else if (point.toString() === 'whiteHome') {
+			top = {0: 270, 1: 278, 2: 286, 3: 294, 4: 302, 
+					5: 310, 6: 318, 7: 326, 8: 334, 9: 342, 
+					10: 350, 11: 358, 12: 366, 13: 374, 14: 382}
+		} else if (parseInt(point.toString().slice(5)) <= 12){
+			top = {0: 390, 1: 355, 2: 320, 3: 285, 4: 250, 
+					5: 240, 6: 240, 7: 240, 8: 240, 9: 240, 
+					10: 240, 11: 240, 12: 240, 13: 240, 14: 240}
+		} else {
+			top = {0: 20, 1: 55, 2: 90, 3: 125, 4: 160, 
+					5: 30, 6: 30, 7: 30, 8: 30, 9: 30, 
+					10: 30, 11: 30, 12: 30, 13: 30, 14: 30}
+		}
+		return top[position]
+	} else {
+		console.log('!!! passed ' + axis.toString() + ' to gridLookup')
+	}
+}
 
 
 
-// function addDice(player) {
-//     return player.dice[0].value +  player.dice[1].value
-// }
 
-// function whoseTurn() {
-// 	if (playerOne.turn) {
-// 		console.log(playerOne.name + "'s turn.")
-// 		return playerOne
-// 	} else if (playerTwo.turn) {
-// 		console.log(playerTwo.name + "'s turn.")
-// 		return playerTwo
-// 	} else {
-// 		console.log("nobody's turn.")
-// 		return null
-// 	}
-// }
+
+
 
 
 // plyr = whoseTurn()
@@ -327,27 +439,24 @@ newGame('Gus', 'Nora')
 // 	can't move there
 
 
+
 /*
 
-a graphic should come up and tell you which direction you'll move. 
+* a graphic should come up and tell you which direction you'll move at game start.
+might not be neccesary when dashboard is working?
 
-I find myself translating js info into DOM info a lot - I definitely need
-a single function which will speed that up. 
 
-When this gets more visually interesting, pieces in the move builder should be locked
+* When this gets more visually interesting, pieces in the move builder should be locked
 to the pointer of the player, so when the final click happens they can just rest right
 at whatever spot they were put at
 
 
 
-rules say that you determine first player by each rolling one dice, then the
-winner plays the cumulative roll.
+
+* A "can I take that back" button - which simply alerts you with "no"
 
 
-A "can I take that back" button - which simply alerts you with "no"
-
-
-A "stakes" feature, where at setup, I ask - what issue is this game going to settle?
+* A "stakes" feature, where at setup, I ask - what issue is this game going to settle?
 
 "Who does the dishes."
 "Who's the better beatboxer."
@@ -360,5 +469,7 @@ That is displayed all throughout the game.
 	if I see "whether", or "what", maybe I could direct the players to an
 	interface that takes two inputs
 
+
+* is math.random.floor really a fair random engine? Look into that, might be worth finding a better solution.
 
 */

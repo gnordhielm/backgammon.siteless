@@ -4,6 +4,10 @@ body {
 	height: 100%;
 }
 
+*{
+	transition: all 0.3s linear;
+}
+
 #board {
 	z-index: 1;
 	position: relative;
@@ -57,102 +61,4 @@ body {
 	height: 200px;
 	width: 43px;
 	float: left;
-}
-
-/* hard-coded positioning info */
-
-.point1, .point24 {
-	left: 458px;
-}
-
-.point2, .point23 {
-	left: 421px;
-}
-
-.point3, .point22 {
-	left: 385px;
-}
-
-.point4, .point21 {
-	left: 347px;
-}
-
-.point5, .point20 {
-	left: 311px;
-}
-
-.point6, .point19 {
-	left: 273px;
-}
-
-.point7, .point18 {
-	left: 212px;
-}
-
-.point8, .point17 {
-	left: 175px;
-}
-
-.point9, .point16 {
-	left: 137px;
-}
-
-.point10, .point15 {
-	left: 100px;
-}
-
-.point11, .point14 {
-	left: 64px;
-}
-
-.point12, .point13 {
-	left: 26px;
-}
-
-.top1 {
-	top: 20px;
-}
-
-.top2 {
-	top: 55px;
-}
-
-.top3 {
-	top: 90px;
-}
-
-.top4 {
-	top: 125px;
-}
-
-.top5 {
-	top: 160px;
-}
-
-.top6, .top7, .top8, .top9, .top10, .top11, .top12, .top13, .top14,  .top15 {
-	top: 25px;
-}
-
-.bottom1 {
-	top: 390px;
-}
-
-.bottom2 {
-	top: 355px;
-}
-
-.bottom3 {
-	top: 320px;
-}
-
-.bottom4 {
-	top: 285px;
-}
-
-.bottom5 {
-	top: 250px;
-}
-
-.bottom6, .bottom7, .bottom8, .bottom9, .bottom10, .bottom11, .bottom12, .bottom13, .bottom14,  .bottom15 {
-	top: 245px;
 }
