@@ -63,6 +63,8 @@ function BackgammonBoard() {
 	this.blackHome = []
 }
 
+// the turn methods are designed to execute whatever they are given - vetting of turn legality
+// needs to be done at an earlier stage
 function Turn(player) {
 	this.player = player
 	this.doubles = (player.dice[0].value === player.dice[1].value) ? true : false
@@ -73,23 +75,27 @@ function Turn(player) {
 	this.moves = []
 	this.undo = function() {
 		// pop the last move
-		console.log('undo')
+		// because a move can become retroactively illegal if an earlier move is 
+		// undone, undos must happen in order
+		console.log('Popped a move from the turn.')
 	}
 	this.preview = function() {
 		// makes a copy of the global board object in its current state
 		// changes to prevBoard do not affect the gloabal board. Thx jQuery.
-		var prevBoard = jQuery.extend(true, {}, board)
-		for (var move in this.moves) {
+		var previewBoard = jQuery.extend(true, {}, board)
+		for (var item in this.moves) {
 			// catalogues all the resources used by all the moves
-			for (var i = 0; i < moves.resourcesUsed.length; i++) {
-				this.usedResources.push(moves.resourcesUsed[i])
-			// splices the given piece from a location, pushes it to the destination
-			var loc = prevBoard[move.location]
-			prevBoard[move.destination].push(loc.splice(loc.indexOf(piece)))
+			for (var i = 0; i < this.moves[item].resourcesUsed.length; i++) {
+				this.usedResources.push(this.moves[item].resourcesUsed[i])
 			}
+			// splices the given piece from a location, pushes it to the destination
+			var loc = previewBoard[this.moves[item].location] // ex: previewBoard[point24]
+			var locIndex = loc.indexOf(this.moves[item].piece) // ex: 0 --> previewBoard[point24][0]
+			var dest = previewBoard[this.moves[item].destination] // ex: previewBoard[point22]
+			dest.push(loc.splice(locIndex, 1)[0])
 		}
 		console.log('Previewing ' + this.moves.length.toString() + ' move(s).')
-		return prevBoard
+		return previewBoard
 	}
 	this.commit = function() {
 		for (var move in this.moves) {
@@ -179,10 +185,10 @@ function playTurn(player) {
 	thisTurn = new Turn(player) 
 	console.log('Created new turn for ' + player.name)
 	console.log(player.name + ' may move ' + thisTurn.availableResources.join(', '))
-	// getPlayable(thisTurn, 'pieces')
-	// getPlayable(thisTurn, 'points')
-
 }
+
+// getPlayable(thisTurn, 'pieces')
+// getPlayable(thisTurn, 'points')
 
 // function getPlayable(trn, type) {
 // 	var prev = trn.preview()
@@ -312,7 +318,6 @@ function runGame() {
 	openingRoll()
 	var activePlayer = whoseTurn()
 	playTurn(activePlayer)
-
 }
 
 runGame()
