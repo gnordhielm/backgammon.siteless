@@ -1,123 +1,5 @@
 console.log('gamelogic.js connected')
 
-///// Object Constructors /////
-
-function Player(name, color) {
-	this.name = name
-	this.color = color
-	this.turn = false
-	// all in home quadrant
-	this.homeStrech = false
-	this.dice = [] 
-}
-
-function Dice(){
-	this.value = NaN
-	this.roll = function () {
-		this.value = Math.floor(Math.random() * 6) + 1
-	}
-	this.declare = function() {
-		// returns a description of the dice's value as a string
-		return this.value.toString()
-	}
-}
-
-function Piece(id, player) {
-	this.id = id
-	this.player = player
-	this.declare = function() {
-		// returns a description of the piece's attributes as a string
-		return this.player.color + this.id.toString()
-	}
-}
-
-function BackgammonBoard() {		
-	this.point1 = [], 
-	this.point2 = [], 
-	this.point3 = [], 
-	this.point4 = [], 
-	this.point5 = [], 
-	this.point6 = [], 
-
-	this.point7 = [], 
-	this.point8 = [], 
-	this.point9 = [],
-	this.point10 = [],
-	this.point11 = [],
-	this.point12 = [],
-		
-	this.point13 = [],
-	this.point14 = [],
-	this.point15 = [],
-	this.point16 = [],
-	this.point17 = [],
-	this.point18 = [],
-		
-	this.point19 = [],
-	this.point20 = [],
-	this.point21 = [],
-	this.point22 = [],
-	this.point23 = [],
-	this.point24 = [],
-		
-	this.bar = [], 
-	this.whiteHome = [], 
-	this.blackHome = []
-}
-
-// the turn methods are designed to execute whatever they are given - vetting of turn legality
-// needs to be done at an earlier stage
-function Turn(player) {
-	this.player = player
-	this.doubles = (player.dice[0].value === player.dice[1].value) ? true : false
-	this.availableResources = this.doubles ?
-					 [player.dice[0].value, player.dice[0].value, player.dice[0].value, player.dice[0].value] :
-					 [player.dice[0].value, player.dice[1].value]
-	this.expendedResources = []
-	this.moves = []
-	this.undo = function() {
-		// pop the last move
-		// because a move can become retroactively illegal if an earlier move is 
-		// undone, undos must happen in order
-		var msg = this.moves.length === 0 ? "No moves left to undo" : "Removed the most recent move."
-		this.moves.pop()
-		console.log(msg)
-	}
-	this.preview = function() {
-		// makes a copy of the global board object in its current state
-		// then applies moves and saves it to the preview variable
-		preview = jQuery.extend(true, {}, board)
-		if (this.moves.length) {
-			for (var item in this.moves) {
-				// catalogues all the resources used by all the moves
-				for (var i = 0; i < this.moves[item].resourcesUsed.length; i++) {
-					this.availableResources.splice(this.availableResources.indexOf(resourcesUsed[i]), 1)
-					this.expendedResources.push(this.moves[item].resourcesUsed[i])
-				}
-				// splices the given piece from a location, pushes it to the destination
-				var loc = preview[this.moves[item].location] // ex: preview[point24]
-				var locIndex = loc.indexOf(this.moves[item].piece) // ex: 0 --> preview[point24][0]
-				var dest = preview[this.moves[item].destination] // ex: preview[point22]
-				dest.push(loc.splice(locIndex, 1)[0])
-			}
-			console.log('Updated preview with ' + this.moves.length.toString() + ' move(s).')	
-		} else {
-			console.log('Preview is identical to the board.')	
-		}
-		return preview
-	}
-	this.commit = function() {
-		console.log('commit move')
-	}
-}
-
-function Move(piece) {
-	this.piece = piece // 'white11'
-	this.location = '' // 'point5'
-	this.destination = '' // 'whiteHome'
-	this.resourcesUsed = [] // [2, 3]
-}
-
 ///// Global Variables /////
 // Any function should feel free to alter and read these without taking them as arguments
 
@@ -191,28 +73,10 @@ function openingRoll() {
 // creates a new turn object and builds moves for it
 function startTurn(player) {
 	thisTurn = new Turn(player) 
-	preview = thisTurn.preview()
+	thisTurn.preview()
 	console.log('Created new turn for ' + player.name)
 	console.log(player.name + ' may move ' + thisTurn.availableResources.join(', '))
-	if (getBarPieces().length) {
-		// handle bar logic
-		console.log('!!! no bar logic')
-	} else {
-		activatePieces()
-	}
-}
-
-// returns an array of a player's pieces on the bar
-function getBarPieces() {
-	var barPieces = []
-	if (board.bar.length) {
-		for (var i = 0; i < preview.bar.length; i++) {
-			if (preview.bar[i].player.color === thisTurn.player.color ) {
-				barPieces.push(preview.bar[i])
-			}
-		}
-	} 
-	return barPieces
+	activatePieces()
 }
 
 // makes pieces build a move on click
@@ -226,7 +90,7 @@ function activatePieces() {
 // facilitates creating new move objects with DOM clicks
 function moveBuilder(){
 	if (this.id.substring(0,5) === thisTurn.player.color) {
-		move = new Move(DOMtoPiece(this.id))
+		move = new Move(DOMtoPiece(this.id), 'point0')
 		move.location = DOMtoPosition(this.id, preview)
 		console.log('Created a new move with ' + this.id)
 		thisTurn.moves.push(move)
@@ -255,7 +119,6 @@ function activatePoints() {
 	var points = []
 	// get all possible moves
 	switch(thisTurn.player.color) {
-	// point 0 = blackHome, point25= whitehome
 	// if a player doesn't have all pieces in their home quadrant, 
 	// don't add home
 		case 'white':
@@ -264,7 +127,7 @@ function activatePoints() {
 				// for white, you ADD to move to home
 				result = 'point' + (start + dice[i]).toString()
 				if (result === 'point25') {
-					if (thisTurn.player.homeStretch) points.push('whiteHome')
+					if (thisTurn.player.homeStretch) points.push('point25')
 				} else if (result !== 'point0') {
 					points.push(result)
 				}
@@ -276,7 +139,7 @@ function activatePoints() {
 				// for black, you SUBTRACT to move to home
 				result = 'point' + (start - dice[i]).toString()
 				if (result === 'point0') {
-					if (thisTurn.player.homeStretch) points.push('blackHome')
+					if (thisTurn.player.homeStretch) points.push('point0')
 				} else if (result !== 'point25') {
 					points.push(result)
 				}
@@ -430,6 +293,20 @@ function DOMtoPosition(id, brd) {
 	}
 }
 
+// checks to see if a spot on the board is occupied by the
+// other player, and so cannot be moved to
+function isOccupied(point, brd, thisPlayer) {
+	if (brd[point].length > 1) {
+		if (brd[point][0].color !== thisPlayer.color) {
+			return true
+		} else {
+			return false 
+		}
+	} else {
+		return false
+	}
+}
+
 function gridLookup(point, position, axis) {
 	if (axis === 'left') {
 		var left = {
@@ -446,7 +323,7 @@ function gridLookup(point, position, axis) {
 			point11: 64, point14: 64, 
 			point12: 26, point13: 26, 
 			bar: 242,
-			blackHome: 515, whiteHome: 515
+			point0: 515, point25: 515
 		}
 		return left[point].toString() + 'px'
 	} else if (axis === 'top') {
@@ -455,11 +332,11 @@ function gridLookup(point, position, axis) {
 			top = {0: 228, 1: 211, 2: 188, 3: 171, 4: 154, 
 					5: 154, 6: 154, 7: 154, 8: 154, 9: 154, 
 					10: 154, 11: 154, 12: 154, 13: 154, 14: 154}
-		} else if (point.toString() === 'blackHome') {
+		} else if (point.toString() === 'point0') {
 			top = {0: 20, 1: 28, 2: 36, 3: 44, 4: 52, 
 					5: 60, 6: 68, 7: 76, 8: 84, 9: 92, 
 					10: 100, 11: 108, 12: 116, 13: 124, 14: 132}
-		} else if (point.toString() === 'whiteHome') {
+		} else if (point.toString() === 'point25') {
 			top = {0: 270, 1: 278, 2: 286, 3: 294, 4: 302, 
 					5: 310, 6: 318, 7: 326, 8: 334, 9: 342, 
 					10: 350, 11: 358, 12: 366, 13: 374, 14: 382}
