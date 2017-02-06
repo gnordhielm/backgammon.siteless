@@ -1,4 +1,4 @@
-console.log('main.js connected')
+console.log('gamelogic.js connected')
 
 ///// Object Constructors /////
 
@@ -6,6 +6,8 @@ function Player(name, color) {
 	this.name = name
 	this.color = color
 	this.turn = false
+	// all in home quadrant
+	this.homeStrech = false
 	this.dice = [] 
 }
 
@@ -71,35 +73,40 @@ function Turn(player) {
 	this.availableResources = this.doubles ?
 					 [player.dice[0].value, player.dice[0].value, player.dice[0].value, player.dice[0].value] :
 					 [player.dice[0].value, player.dice[1].value]
-	this.usedResources = []
+	this.expendedResources = []
 	this.moves = []
 	this.undo = function() {
 		// pop the last move
 		// because a move can become retroactively illegal if an earlier move is 
 		// undone, undos must happen in order
-		console.log('Popped a move from the turn.')
+		var msg = this.moves.length === 0 ? "No moves left to undo" : "Removed the most recent move."
+		this.moves.pop()
+		console.log(msg)
 	}
 	this.preview = function() {
 		// makes a copy of the global board object in its current state
-		// changes to prevBoard do not affect the gloabal board. Thx jQuery.
-		var previewBoard = jQuery.extend(true, {}, board)
-		for (var item in this.moves) {
-			// catalogues all the resources used by all the moves
-			for (var i = 0; i < this.moves[item].resourcesUsed.length; i++) {
-				this.usedResources.push(this.moves[item].resourcesUsed[i])
+		// then applies moves and saves it to the preview variable
+		preview = jQuery.extend(true, {}, board)
+		if (this.moves.length) {
+			for (var item in this.moves) {
+				// catalogues all the resources used by all the moves
+				for (var i = 0; i < this.moves[item].resourcesUsed.length; i++) {
+					this.availableResources.splice(this.availableResources.indexOf(resourcesUsed[i]), 1)
+					this.expendedResources.push(this.moves[item].resourcesUsed[i])
+				}
+				// splices the given piece from a location, pushes it to the destination
+				var loc = preview[this.moves[item].location] // ex: preview[point24]
+				var locIndex = loc.indexOf(this.moves[item].piece) // ex: 0 --> preview[point24][0]
+				var dest = preview[this.moves[item].destination] // ex: preview[point22]
+				dest.push(loc.splice(locIndex, 1)[0])
 			}
-			// splices the given piece from a location, pushes it to the destination
-			var loc = previewBoard[this.moves[item].location] // ex: previewBoard[point24]
-			var locIndex = loc.indexOf(this.moves[item].piece) // ex: 0 --> previewBoard[point24][0]
-			var dest = previewBoard[this.moves[item].destination] // ex: previewBoard[point22]
-			dest.push(loc.splice(locIndex, 1)[0])
+			console.log('Updated preview with ' + this.moves.length.toString() + ' move(s).')	
+		} else {
+			console.log('Preview is identical to the board.')	
 		}
-		console.log('Previewing ' + this.moves.length.toString() + ' move(s).')
-		return previewBoard
+		return preview
 	}
 	this.commit = function() {
-		for (var move in this.moves) {
-		}
 		console.log('commit move')
 	}
 }
@@ -111,16 +118,18 @@ function Move(piece) {
 	this.resourcesUsed = [] // [2, 3]
 }
 
-///// Game Setup Functions /////
-
-// NOTE: this code is written such that ANY function should be able to
-// alter the board, players, or winner without explicity taking any of
-// them as a parameter. In cases where a function could, at one time or
-// another, be applied to either player, "player" is specified as a parameter
+///// Global Variables /////
+// Any function should feel free to alter and read these without taking them as arguments
 
 var board
+var preview
+
+var thisTurn
+
 var white
 var black
+
+///// Game Setup Functions /////
 
 function newGame(whiteName, blackName) {
 	white = new Player(whiteName, 'white')
@@ -155,6 +164,7 @@ function newGame(whiteName, blackName) {
 
 ///// Gameplay Functions /////
 
+// determines who goes first and what roll they use
 function openingRoll() {
 	white.dice[0].roll()
 	console.log(white.name + ' rolled a ' + white.dice[0].declare())
@@ -178,14 +188,110 @@ function openingRoll() {
 	}
 }
 
-// !!! Make this un-global before deployment
-var thisTurn
-
-function playTurn(player) {
+// creates a new turn object and builds moves for it
+function startTurn(player) {
 	thisTurn = new Turn(player) 
+	preview = thisTurn.preview()
 	console.log('Created new turn for ' + player.name)
 	console.log(player.name + ' may move ' + thisTurn.availableResources.join(', '))
+	if (getBarPieces().length) {
+		// handle bar logic
+		console.log('!!! no bar logic')
+	} else {
+		activatePieces()
+	}
 }
+
+// returns an array of a player's pieces on the bar
+function getBarPieces() {
+	var barPieces = []
+	if (board.bar.length) {
+		for (var i = 0; i < preview.bar.length; i++) {
+			if (preview.bar[i].player.color === thisTurn.player.color ) {
+				barPieces.push(preview.bar[i])
+			}
+		}
+	} 
+	return barPieces
+}
+
+// makes pieces build a move on click
+function activatePieces() {
+	var $pieces = $('.' + thisTurn.player.color + '-piece')
+	$pieces.addClass('active')
+	$pieces.on('click', moveBuilder)
+	console.log(thisTurn.player.name + "'s pieces are clickable.")
+}
+
+// facilitates creating new move objects with DOM clicks
+function moveBuilder(){
+	if (this.id.substring(0,5) === thisTurn.player.color) {
+		move = new Move(DOMtoPiece(this.id))
+		move.location = DOMtoPosition(this.id, preview)
+		console.log('Created a new move with ' + this.id)
+		thisTurn.moves.push(move)
+		// deactivate pieces
+		deactivatePieces()
+		//activate points.
+		activatePoints()
+	} else if (this.class === 'point') {
+		thisTurn.moves.slice(-1)[0]
+	} else {
+		console.log('!!! passed an invalid DOM node to moveBuilder')
+	}
+}
+
+function deactivatePieces() {
+	var $pieces = $('.' + thisTurn.player.color + '-piece')
+	$pieces.removeClass('active')
+	$pieces.off()
+	console.log(thisTurn.player.name + "'s pieces are no longer clickable.")
+}
+
+// as it turns out, this is where most of the rules are going
+function activatePoints() {
+	var start = parseInt(thisTurn.moves.slice(-1)[0].location.slice(5))
+	var dice = thisTurn.availableResources
+	var points = []
+	// get all possible moves
+	switch(thisTurn.player.color) {
+	// point 0 = blackHome, point25= whitehome
+	// if a player doesn't have all pieces in their home quadrant, 
+	// don't add home
+		case 'white':
+			for (var i = 0; i < dice.length; i++) {
+				var result
+				// for white, you ADD to move to home
+				result = 'point' + (start + dice[i]).toString()
+				if (result === 'point25') {
+					if (thisTurn.player.homeStretch) points.push('whiteHome')
+				} else if (result !== 'point0') {
+					points.push(result)
+				}
+			}
+			break
+		case 'black':
+			for (var i = 0; i < dice.length; i++) {
+				var result
+				// for black, you SUBTRACT to move to home
+				result = 'point' + (start - dice[i]).toString()
+				if (result === 'point0') {
+					if (thisTurn.player.homeStretch) points.push('blackHome')
+				} else if (result !== 'point25') {
+					points.push(result)
+				}
+			}
+			break
+	}
+	// remove occupied points
+
+	//START - work on getting occupied points outta there, finishing first move builder
+
+	// $points.on('click', moveBuilder)
+	console.log(points.join(', ') + " are clickable.")
+}
+
+
 
 // getPlayable(thisTurn, 'pieces')
 // getPlayable(thisTurn, 'points')
@@ -214,46 +320,11 @@ function playTurn(player) {
 	// There is a distinction between previewing a move and committing it, though they are
 	// visually identical 
 
-// I need the ability to take pieces out of this array - which means I might need to 
-// make it a javascript object. Maybe I go through and apply a class to each point,
-// then select that class in jquery and add the event listener - derive the js array
-// from the actual board object, how 'bout?
-// function activatePieces(player) {
-// 	var $pieces = $('.' + player.color + '-piece')
-// 	$pieces.addClass('active')
-// 	$pieces.on('click', function(e){
-// 		console.log('clicked ' + this.id)
-// 	})
-// 	console.log(player.name + "'s pieces are clickable.")
-// }
-
-// function activatePoints(player) {
-// 	var $points = $('.point')
-// 	$points.pop
-// 	$points.addClass('active')
-// 	$points.on('click', function(e){
-// 		console.log('clicked point ' + this.id)
-// 	})
-// 	console.log(player.name + "'s points are clickable.")
-
-// }
 
 function nextTurn() {
 	white.turn = !white.turn
 	black.turn = !black.turn
 }
-
-///// Turn Building Functions /////
-
-// function hasDoubles(player) {
-// 	if (player.dice[0].value === player.dice[1].value) {
-// 		console.log(player.name + " has doubles.")
-// 		return true
-// 	} else {
-// 		console.log(player.name + " does not have doubles.")
-// 		return false
-// 	}
-// }
 
 // function isWinner(player) {
 // 	if (board[player.color].length === 15) {
@@ -309,17 +380,14 @@ function nextTurn() {
 ///////////////////////////////
 
 ///// Utility and Dev Functions /////
-// will be commented out in final code
-
 
 function runGame() {
-	newGame('Gus', 'Nora')
+	newGame('Nora', 'Gus')
 	visualizeBoard(board)
 	openingRoll()
 	var activePlayer = whoseTurn()
-	playTurn(activePlayer)
+	startTurn(activePlayer)
 }
-
 runGame()
 
 
@@ -344,6 +412,22 @@ function visualizeBoard(brd) {
 	}
 	console.log('!!! updated the DOM with visualizeboard')
 	console.log('--------------------------')
+}
+
+function DOMtoPiece(id) {
+	for (var point in board) {
+		for (var i in board[point]) {
+			if (board[point][i].declare() === id) return board[point][i]
+		}
+	}
+}
+
+function DOMtoPosition(id, brd) {
+	for (var point in brd) {
+		for (var i in brd[point]) {
+			if (brd[point][i].declare() === id) return point.toString()
+		}
+	}
 }
 
 function gridLookup(point, position, axis) {
