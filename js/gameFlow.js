@@ -73,165 +73,103 @@ function openingRoll() {
 // creates a new turn object and builds moves for it
 function startTurn(player) {
 	thisTurn = new Turn(player) 
-	thisTurn.preview()
-	console.log('Created new turn for ' + player.name)
+	thisTurn.updatePreview()
 	console.log(player.name + ' may move ' + thisTurn.availableResources.join(', '))
-	activatePieces()
+	activateBoard()
 }
 
-// makes pieces build a move on click
-function activatePieces() {
-	var $pieces = $('.' + thisTurn.player.color + '-piece')
-	$pieces.addClass('active')
-	$pieces.on('click', moveBuilder)
-	console.log(thisTurn.player.name + "'s pieces are clickable.")
-}
-
-// facilitates creating new move objects with DOM clicks
-function moveBuilder(){
-	if (this.id.substring(0,5) === thisTurn.player.color) {
-		move = new Move(DOMtoPiece(this.id), 'point0')
-		move.location = DOMtoPosition(this.id, preview)
-		console.log('Created a new move with ' + this.id)
-		thisTurn.moves.push(move)
-		// deactivate pieces
-		deactivatePieces()
-		//activate points.
-		activatePoints()
-	} else if (this.class === 'point') {
-		thisTurn.moves.slice(-1)[0]
-	} else {
-		console.log('!!! passed an invalid DOM node to moveBuilder')
-	}
-}
-
-function deactivatePieces() {
-	var $pieces = $('.' + thisTurn.player.color + '-piece')
-	$pieces.removeClass('active')
-	$pieces.off()
-	console.log(thisTurn.player.name + "'s pieces are no longer clickable.")
-}
-
-// as it turns out, this is where most of the rules are going
-function activatePoints() {
-	var start = parseInt(thisTurn.moves.slice(-1)[0].location.slice(5))
-	var dice = thisTurn.availableResources
-	var points = []
-	// get all possible moves
-	switch(thisTurn.player.color) {
-	// if a player doesn't have all pieces in their home quadrant, 
-	// don't add home
-		case 'white':
-			for (var i = 0; i < dice.length; i++) {
-				var result
-				// for white, you ADD to move to home
-				result = 'point' + (start + dice[i]).toString()
-				if (result === 'point25') {
-					if (thisTurn.player.homeStretch) points.push('point25')
-				} else if (result !== 'point0') {
-					points.push(result)
-				}
-			}
-			break
-		case 'black':
-			for (var i = 0; i < dice.length; i++) {
-				var result
-				// for black, you SUBTRACT to move to home
-				result = 'point' + (start - dice[i]).toString()
-				if (result === 'point0') {
-					if (thisTurn.player.homeStretch) points.push('point0')
-				} else if (result !== 'point25') {
-					points.push(result)
-				}
-			}
-			break
-	}
-	// remove occupied points
-
-	//START - work on getting occupied points outta there, finishing first move builder
-
-	// $points.on('click', moveBuilder)
-	console.log(points.join(', ') + " are clickable.")
-}
+// Okay now it's time to make this a little easier to interact with
+// I have an array of move objects - which all have location and destination. 
+// If I click on a piece, I can narrow down the moves,
+// If I click a point, I can also narrow down the moves
+// I want to dynamically add "clickability" to pieces and moves.
+// At this point, I have the information to do that. 
+// I'll need a callback function as an event listener, which gives
+// information to another, more general
 
 
 
-// getPlayable(thisTurn, 'pieces')
-// getPlayable(thisTurn, 'points')
 
-// function getPlayable(trn, type) {
-// 	var prev = trn.preview()
-// 	var playablePieces
-// 	var playablePoints
-// 	if (type === 'pieces') {
 
-// 	} else if (type === 'points') {
-
-// 	} else {
-// 		console.log('!!! passed ' + type.toString() + ' to getPlayable')
-// 	}
-
+// // makes pieces build a move on click
+// function activatePieces() {
+// 	var $pieces = $('.' + thisTurn.player.color + '-piece')
+// 	$pieces.addClass('active')
+// 	$pieces.on('click', moveBuilder)
+// 	console.log(thisTurn.player.name + "'s pieces are clickable.")
 // }
 
-	// START HERE: how should event listeners be employed to create new move objects?
-	//1  I need to make an array of pieces the player can move with this setup
-	//2  I need to make an array of places the payer can move with this setup
-	//3  I need to make both clickable, and when they are clicked, they need to visualize 
-	// a move.
-	//4 I need to repeat the previous steps, now taking into account the changes the move 
-	// makes
-	// There is a distinction between previewing a move and committing it, though they are
-	// visually identical 
+// // facilitates creating new move objects with DOM clicks
+// function moveBuilder(){
+// 	if (this.id.substring(0,5) === thisTurn.player.color) {
+// 		move = new Move(DOMtoPiece(this.id), 'point0')
+// 		move.location = DOMtoPosition(this.id, preview)
+// 		console.log('Created a new move with ' + this.id)
+// 		thisTurn.moves.push(move)
+// 		// deactivate pieces
+// 		deactivatePieces()
+// 		//activate points.
+// 		activatePoints()
+// 	} else if (this.class === 'point') {
+// 		thisTurn.moves.slice(-1)[0]
+// 	} else {
+// 		console.log('!!! passed an invalid DOM node to moveBuilder')
+// 	}
+// }
+
+// function deactivatePieces() {
+// 	var $pieces = $('.' + thisTurn.player.color + '-piece')
+// 	$pieces.removeClass('active')
+// 	$pieces.off()
+// 	console.log(thisTurn.player.name + "'s pieces are no longer clickable.")
+// }
+
+// // as it turns out, this is where most of the rules are going
+// function activatePoints() {
+// 	var start = parseInt(thisTurn.moves.slice(-1)[0].location.slice(5))
+// 	var dice = thisTurn.availableResources
+// 	var points = []
+// 	// get all possible moves
+// 	switch(thisTurn.player.color) {
+// 	// if a player doesn't have all pieces in their home quadrant, 
+// 	// don't add home
+// 		case 'white':
+// 			for (var i = 0; i < dice.length; i++) {
+// 				var result
+// 				// for white, you ADD to move to home
+// 				result = 'point' + (start + dice[i]).toString()
+// 				if (result === 'point25') {
+// 					if (thisTurn.player.homeStretch) points.push('point25')
+// 				} else if (result !== 'point0') {
+// 					points.push(result)
+// 				}
+// 			}
+// 			break
+// 		case 'black':
+// 			for (var i = 0; i < dice.length; i++) {
+// 				var result
+// 				// for black, you SUBTRACT to move to home
+// 				result = 'point' + (start - dice[i]).toString()
+// 				if (result === 'point0') {
+// 					if (thisTurn.player.homeStretch) points.push('point0')
+// 				} else if (result !== 'point25') {
+// 					points.push(result)
+// 				}
+// 			}
+// 			break
+// 	}
+// 	// remove occupied points
+
+
+// 	// $points.on('click', moveBuilder)
+// 	console.log(points.join(', ') + " are clickable.")
+// }
 
 
 function nextTurn() {
 	white.turn = !white.turn
 	black.turn = !black.turn
 }
-
-// function isWinner(player) {
-// 	if (board[player.color].length === 15) {
-// 		console.log(player.name + " wins the game!")
-// 		return true
-// 	} else {
-// 		console.log(player.name + " has not won the game.")
-// 		return false
-// 	}
-// }
-// this is not the right approach. This is: player clicks on something, I take that in
-// and tell player if it's okay or not. It should be, player clicks on something, if it's
-// not legal, I don't take the information in.
-// Which means I need to start with the activate pieces function. Do not activate pieces
-// if they can't be moved
-// do not activate points if they can't be moved to.
-
-// function hasOnBar(player) {
-// 	var onBar = []
-// 	for (var i = 0; i < board.bar.length; i++) {
-// 		if (board.bar[i].color === player.color) onBar.push(board.bar[i])
-// 	}
-// 	return onBar
-// }
-
-// function isOnBar(piece) {
-// 	var result = false
-// 	for (var i = 0; i < board.bar.length; i++) {
-// 		if (board.bar[i].id === piece.id) result = true
-// 	}
-// 	return result
-// }
-
-
-// function isLegalMove(piece, place, player) {
-// 	// if there is a same-color piece on the bar and this is not it
-// 	if (!!hasOnBar(player).length && !isOnBar(piece)) {
-// 		return false
-// 	}
-// 	// if the place is occupied by more than one of the other color
-// 	// else true
-// }
-
-
 
 ///// Game End Functions /////
 
@@ -240,9 +178,7 @@ function nextTurn() {
 //  save the names
 //  
 
-///////////////////////////////
-
-///// Utility and Dev Functions /////
+///// Helper Functions /////
 
 function runGame() {
 	newGame('Nora', 'Gus')
@@ -293,11 +229,11 @@ function DOMtoPosition(id, brd) {
 	}
 }
 
-// checks to see if a spot on the board is occupied by the
+// checks to see if a spot on the given board is occupied by the
 // other player, and so cannot be moved to
 function isOccupied(point, brd, thisPlayer) {
 	if (brd[point].length > 1) {
-		if (brd[point][0].color !== thisPlayer.color) {
+		if (brd[point][0].player.color !== thisPlayer.color) {
 			return true
 		} else {
 			return false 
@@ -305,6 +241,26 @@ function isOccupied(point, brd, thisPlayer) {
 	} else {
 		return false
 	}
+}
+
+//returns the player you don't pass to it
+function getOtherPlayer(player) {
+	if (player.color === "white") {
+		return black
+	} else {
+		return white
+	}
+}
+
+//returns an array of this player's pieces on the preview board
+function getPieces(player) {
+	var pieces = []
+	for (var point in preview) {
+		for (var i in preview[point]) {
+			if (preview[point][i].player === player) pieces.push(preview[point][i])
+		}
+	}
+	return pieces
 }
 
 function gridLookup(point, position, axis) {
@@ -407,6 +363,14 @@ function gridLookup(point, position, axis) {
 
 
 /*
+
+* right now barred is hard coded, and the move manages setting and
+resetting it. It might be easier if that were a function, and each
+player object could figure out if it was barred or not based on the 
+preview board... that's where there's some drama regarding when you
+update the preview board. Maybe I could have it return the objective
+board... but then I'll have to check it against the preview board and
+who wants that.
 
 * a graphic should come up and tell you which direction you'll move at game start.
 might not be neccesary when dashboard is working?

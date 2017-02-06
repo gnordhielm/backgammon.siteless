@@ -7,6 +7,8 @@ var Player = function(name, color) {
 	this.color = color
 	// operator used to advance up/down the board
 	this.operand = this.color === 'white' ? '+' : '-'
+	// point number of this player's home
+	this.home = this.color === 'white' ? 'point25' : 'point0'
 	// point used as the bar - opposite of home
 	this.barCountOut = this.color === 'white' ? 'point0' : 'point25'
 	this.turn = false
@@ -70,7 +72,7 @@ var Turn = function(player) {
 		this.moves.splice(-1).restorePlayer
 		console.log(msg)
 	}
-	this.preview = function() {
+	this.updatePreview = function() {
 		// makes a copy of the global board object in its current state
 		// then applies moves and saves it to the preview variable
 		preview = jQuery.extend(true, {}, board)
@@ -90,31 +92,69 @@ var Turn = function(player) {
 		}
 	}
 	this.possibleMoves = function() {
+		this.updatePreview()
 		var possible = []
 		// check if the player has pieces on the bar
 		if (this.player.barred) {
 			// move player's possible bar pieces into possible
 			for (var i = 0; i < preview.bar.length; i++) {
-				if (preview.bar[i].player.color === this.player.color ) {
+				if (preview.bar[i].player === this.player ) {
 					for (var j = 0; j < this.availableResources.length; j++) {
-						var countOut = 'point' + eval(this.player.barCountOut.slice(5) + 
-											this.player.operand + 
-											this.availableResources[j]).toString()
+						var countOut = 'point' + 
+										eval(this.player.barCountOut.slice(5) + 
+										this.player.operand + 
+										this.availableResources[j]).toString()
 						if (!isOccupied(countOut, preview, this.player)) possible.push(new Move(preview.bar[i], countOut))			
 					}
 				}
 			}
 		// check if player is in the home stretch
 		} else if (this.player.homeStretch) {
-			// deal with that bullshit here.
+			for (var point in preview) {
+				for (var piece in preview[point]) {
+					if (preview[point][piece].player.color === this.player.color ) {
+						for (var dice in this.availableResources) {
+							var countOut = 'point' + 
+											eval(point.slice(5) + 
+											this.player.operand + 
+											this.availableResources[dice]).toString()
+							// it's possible if the point is not occupied 
+							// AND the point is not the player's home
+							if (!isOccupied(point, preview, this.player)) {
+								console.log(point + ' to ' + countOut)
+								possible.push(new Move(preview[point][piece], countOut))
+							}				
+						}
+					}
+				}
+			}
+
+		// everything else - does not allow moves into home. 
 		} else {
-		
+			for (var point in preview) {
+				for (var piece in preview[point]) {
+					if (preview[point][piece].player.color === this.player.color ) {
+						for (var dice in this.availableResources) {
+							var countOut = 'point' + 
+											eval(point.slice(5) + 
+											this.player.operand + 
+											this.availableResources[dice]).toString()
+							// it's possible if the point is not occupied 
+							// AND the point is not the player's home
+							if (!isOccupied(point, preview, this.player) && countOut !== this.player.home) {
+								console.log(point + ' to ' + countOut)
+								possible.push(new Move(preview[point][piece], countOut))
+							}				
+						}
+					}
+				}
+			}	
 		}
 		return possible
 	}
 	this.commit = function() {
 		// sets "objective" board to whatever the preview board is
-		this.preview()
+		this.updatePreview()
 		board = preview
 		console.log('Committed ' + this.moves.length.toString() + ' move(s).')
 	}
@@ -128,13 +168,31 @@ var Move = function(piece, destination) {
 	this.dieUsed = this.location === 'bar' ? 
 								 Math.abs(parseInt(this.piece.player.barCountOut.slice(5)) - parseInt(this.destination.slice(5))):
 								 Math.abs(parseInt(this.location.slice(5)) - parseInt(this.destination.slice(5)))
-	this.updatePlayer = function(val, bool) {
-		this.piece.player[val]= bool
+	// this should work automatically. If I apply a move which takes a player out of
+	// the bar, unbar them. If it puts another player's piece in the bar,
+	// bar them and unhome them. If it puts the last of this player's pieces in the
+	// home quadrant, home them.  
+	// 
+	this.updatePlayer = function() {
+		// did I capture another piece
+		if (false) {
+			getOtherPlayer(this.piece.player).barred = true
+			getOtherPlayer(this.piece.player).homeStretch = false
+
+		// did I move my last piece home	
+		} else if (false) {
+			this.piece.player.homeStretch = true
+		} 
 	}
-	this.restoreToken = [this.piece.player.barred, this.piece.player.homeStretch] // [true,false]
-	this.restorePlayer = function() {
+	this.restoreToken = [this.piece.player.barred, 
+						 this.piece.player.homeStretch,
+						 getOtherPlayer(this.piece.player).barred, 
+						 getOtherPlayer(this.piece.player).homeStretch] // [true, false, false, false]
+	this.restorePlayers = function() {
 		this.piece.player.barred = this.restoreToken[0]
 		this.piece.player.homeStretch = this.restoreToken[1]
+		getOtherPlayer(this.piece.player).barred = this.restoreToken[2]
+		getOtherPlayer(this.piece.player).homeStretch = this.restoreToken[3]
 	}
 }
 
