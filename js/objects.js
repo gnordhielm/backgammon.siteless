@@ -83,7 +83,7 @@ var Turn = function(player) {
 		// because a move can become retroactively illegal if an earlier move is 
 		// undone, undos must happen in order
 		var msg = this.moves.length === 0 ? "No moves left to undo" : "Removed the most recent move."
-		this.moves.splice(-1).restorePlayer
+		this.moves.splice(-1)[0].restorePlayer()
 		console.log(msg)
 		this.updatePreview()
 	}
@@ -94,12 +94,14 @@ var Turn = function(player) {
 		if (this.moves.length) {
 			for (var item in this.moves) {
 				// catalogues the resource used by all the moves
-				this.expendedResources.push(this.availableResources.splice(this.availableResources.indexOf(moves[item].dieUsed), 1))
+				this.expendedResources.push(this.availableResources.splice((this.availableResources.indexOf(this.moves[item].dieUsed)), 1)[0])
 				// splices the given piece from a location, pushes it to the destination
 				var loc = preview[this.moves[item].location] // ex: preview[point24]
-				var locIndex = loc.indexOf(this.moves[item].piece) // ex: 0 --> preview[point24][0]
+				var locIndex = loc.indexOf(this.moves[item].piece) // ex: 0 --> preview[point24][1]
 				var dest = preview[this.moves[item].destination] // ex: preview[point22]
 				dest.push(loc.splice(locIndex, 1)[0])
+				// updates the players --- MAKE SURE THIS COMES AFTER PREVIEW IS ALTERED
+				this.moves[item].updatePlayer()
 			}
 			console.log('Updated preview with ' + this.moves.length.toString() + ' move(s).')	
 		} else {
@@ -114,11 +116,8 @@ var Turn = function(player) {
 			for (var i = 0; i < preview.bar.length; i++) {
 				if (preview.bar[i].player === this.player ) {
 					for (var j = 0; j < this.availableResources.length; j++) {
-						var countOut = 'point' + 
-										eval(this.player.barCountOut.slice(5) + 
-										this.player.operand + 
-										this.availableResources[j]).toString()
-						if (!isOccupied(countOut, preview, this.player)) possible.push(new Move(preview.bar[i], countOut))			
+						var projection = projectMove(point, this.availableResources[dice], this.player)
+						if (!isOccupied(projection, preview, this.player)) possible.push(new Move(preview.bar[i], projection))			
 					}
 				}
 			}
@@ -128,15 +127,12 @@ var Turn = function(player) {
 				for (var piece in preview[point]) {
 					if (preview[point][piece].player.color === this.player.color ) {
 						for (var dice in this.availableResources) {
-							var countOut = 'point' + 
-											eval(point.slice(5) + 
-											this.player.operand + 
-											this.availableResources[dice]).toString()
+							var projection = projectMove(point, this.availableResources[dice], this.player)
 							// it's possible if the point is not occupied 
 							// AND the point is not the player's home
 							if (!isOccupied(point, preview, this.player)) {
-								console.log(board[point][piece].declare() + ' to ' + countOut)
-								possible.push(new Move(preview[point][piece], countOut))
+								console.log(board[point][piece].declare() + ' to ' + projection)
+								possible.push(new Move(preview[point][piece], projection))
 							}				
 						}
 					}
@@ -149,15 +145,12 @@ var Turn = function(player) {
 				for (var piece in preview[point]) {
 					if (preview[point][piece].player === this.player) {
 						for (var dice in this.availableResources) {
-							var countOut = 'point' + 
-											eval(point.slice(5) + 
-											this.player.operand + 
-											this.availableResources[dice]).toString()
+							var projection = projectMove(point, this.availableResources[dice], this.player)				
 							// it's possible if the point is not occupied 
 							// AND the point is not the player's home
-							if (!isOccupied(countOut, preview, this.player) && countOut !== this.player.home) {
-								console.log(board[point][piece].declare() + ' to ' + countOut)
-								possible.push(new Move(preview[point][piece], countOut))
+							if (!isOccupied(projection, preview, this.player) && 
+								projection !== this.player.home) {
+								possible.push(new Move(preview[point][piece], projection))
 							}				
 						}
 					}
@@ -193,7 +186,7 @@ var Move = function(piece, destination) {
 			getOtherPlayer(this.piece.player).barred = true
 			getOtherPlayer(this.piece.player).homeStretch = false
 
-		// did I move my last piece home	
+		// did I move my last piece into the home stretch
 		} else if (false) {
 			this.piece.player.homeStretch = true
 		} 

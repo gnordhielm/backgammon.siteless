@@ -1,15 +1,18 @@
 console.log('gamelogic.js connected')
 
+// Thank God 'piece', 'point', 'white', and 'black' are all five letters long...
+
 ///// Global Variables /////
 // Any function should feel free to alter and read these without taking them as arguments
 
-var board
-var preview
+var board // object which holds the state of the game
 
-var thisTurn
+var thisTurn // object with all kinds of functionality
+var preview // copy of board used to test out moves
+var thisMoves // array of possible move objects
 
-var white
-var black
+var white // object for player one
+var black // object for player two
 
 ///// Game Setup Functions /////
 
@@ -76,18 +79,21 @@ function turnBuilder(player) {
 	thisTurn = new Turn(player) 
 	thisTurn.updatePreview()
 	console.log(player.name + ' may move ' + thisTurn.availableResources.join(', '))
-	
+	moveBuilder()
+
+}
+
+
+function moveBuilder() {
+	thisMoves = thisTurn.possibleMoves()
+
 	// no more resources, no more possible moves
-	if (thisTurn.availableResources.length === 0 || thisTurn.possibleMoves().length === 0) {
+	if (thisTurn.availableResources.length === 0 || thisMoves.length === 0) {
 		
 		// the player can't do anything, acknowledge that, next turn
 		if (thisTurn.moves.length === 0) {
 			console.log('Sorry, ' + thisTurn.player.name + ' there are no possible moves for you.')
-			// roll the other player's dice
-			getOtherPlayer(thisTurn.player).dice[0].roll()
-			getOtherPlayer(thisTurn.player).dice[1].roll()
-			// start a new turn with whoever is not this player
-			turnBuilder(getOtherPlayer(thisTurn.player))
+			endTurn()
 		
 		// the player has exhausted all possible moves, provide commit option
 		} else {
@@ -98,12 +104,8 @@ function turnBuilder(player) {
 				console.log('No more possible moves. Feel free to undo and try other moves.')
 				
 				// while the commit button is clicked
-				// remove the commit button
-				// roll the other player's dice
-				getOtherPlayer(thisTurn.player).dice[0].roll()
-				getOtherPlayer(thisTurn.player).dice[1].roll()
-				// start a new turn with whoever is not this player
-				turnBuilder(getOtherPlayer(thisTurn.player))
+					// remove the commit button
+					endTurn()
 				
 			// the player has used all of their dice, provide commit option	
 			} else {
@@ -111,37 +113,22 @@ function turnBuilder(player) {
 				console.log("You've used all of your dice!")
 				
 				// while the commit button is clicked
-				// remove the commit button
-				// roll the other player's dice
-				getOtherPlayer(thisTurn.player).dice[0].roll()
-				getOtherPlayer(thisTurn.player).dice[1].roll()
-				// start a new turn with whoever is not this player
-				turnBuilder(getOtherPlayer(thisTurn.player))
+					// remove the commit button
+					endTurn()
 			}
 		}
+
+	// go ahead with making a new move
+	} else {
+		updateClickable(thisMoves, 1)
+
 	}
-
-	moveBuilder(thisTurn)
-}
-
-
-function moveBuilder() {
-	// get all possible moves
-	// var move
-	// make pieces and points clickable
-	// if player clicks a piece or a point
-	// calculate remaining moves
-	// if a player clicks the same thing - clear and restart
-	// if a player clicks the same kind of thing - if it's on the same point, and has possible moves
-	//												special case where this will commit two moves
-	// if a player clicks the same kind of thing - and no possible moves... this should never happen
-	// if a player clicks a different kind of thing - push the move to the turn and update the board
-	// pass it on to the turn builder
 }
 
 // function for updating clickable things on the board
 // takes an array of move objects
-function updateClickable(arr) {
+function updateClickable(arr, timesThrough) {
+	var timesThrough = timesThrough
 	var clickable = []
 	for (var i = 0; i < arr.length; i++) {
 		if (clickable.indexOf(arr[i].piece.declare()) === -1) clickable.push(arr[i].piece.declare())
@@ -154,7 +141,95 @@ function updateClickable(arr) {
 	if (clickable.length > 0) {	
 		// add classes and listeners
 		$('#' + clickable.join(',#')).addClass('active')	
+		$('#' + clickable.join(',#')).on('click', function(e) {
+			// first time through
+			if (timesThrough === 1) {
+				// is this a piece or a point?
+				switch (this.id.substring(0, 5)) {
+					case 'point':
+						// set thisMoves to only the moves with this point as a destination
+						winnowMoves('point', this.id)
+						// update clickable with the new array
+						break
+					case thisTurn.player.color:
+						// set thisMoves to only the moves with this point as a destination
+						winnowMoves('piece', this.id)
+						// update clickable with the new array
+						break
+					default:
+						console.log('!!! the function that is supposed to figure out\
+									if things are pieces or points was just fed neither.')
+				}
+			updateClickable(thisMoves, 2)
+
+			// second time through
+			} else if (timesThrough === 2) {
+				// is this a piece or a point?
+				switch (this.id.substring(0, 5)) {
+					case 'point':
+						winnowMoves('point', this.id)
+						break
+					case thisTurn.player.color:
+						winnowMoves('piece', this.id)
+						break
+					default:
+						console.log('!!! the function that is supposed complete a move with\
+									 either a piece or a point was just fed neither.')
+				}
+			endMove()
+			}
+			
+		})	
 	}
+	console.log(thisMoves.length.toString() + " possible moves remain.")
+}
+
+// takes a type (point/piece) as a string and the particular value as a string
+// used by updateClickable to narrow thisMoves down to only moves with that value
+function winnowMoves(type, id) {
+	var result = []
+	// loop through thisMoves, cut away everything of the type which isn't the id
+	switch(type) {
+		case 'point':
+			for (var move in thisMoves) {
+				if (thisMoves[move].destination === id) result.push(thisMoves[move])
+			}
+			break
+		case 'piece':
+			for (var move in thisMoves) {
+				if (thisMoves[move].piece.declare() === id) result.push(thisMoves[move]) 
+			}
+			break
+	}
+	thisMoves = result
+}
+
+// handles the transition into the next move
+function endMove() {
+	// make sure nothing is clickable
+	updateClickable([], 3)
+	// push this move to the turn
+	thisTurn.moves.push(thisMoves[0])
+	// preview the turn
+	thisTurn.updatePreview()
+	// visualize the preview board
+	visualizeBoard(preview)
+	// start a new move
+	moveBuilder()
+}
+
+
+// handles the transition into the next player's turn
+function endTurn() {
+	// commit this player's moves
+	thisTurn.commitToBoard()
+
+	// roll the other player's dice
+	getOtherPlayer(thisTurn.player).dice[0].roll()
+	getOtherPlayer(thisTurn.player).dice[1].roll()
+
+	// start a new turn with whoever is not this player
+	turnBuilder(getOtherPlayer(thisTurn.player))
 }
 
 ///// Game End Functions /////
@@ -211,7 +286,7 @@ function isOccupied(point, brd, thisPlayer) {
 		}
 	} else {
 		return false
-	}
+	}		
 }
 
 //returns the player you don't pass to it
@@ -233,6 +308,22 @@ function getPieces(player) {
 	}
 	return pieces
 }
+
+// given a roll, a player, and a starting position, returns the end position 
+function projectMove(start, roll, player) {
+	var result = 'point' + eval(start.slice(5) + player.operand + roll).toString()
+	var blackFictionalPoints = ['point-1','point-2','point-3','point-4','point-5','point-6']
+	var whiteFictionalPoints = ['point26','point27','point28','point29','point30','point31']
+	// makes sure countOut is actually the board
+	if (blackFictionalPoints.includes(result)) {
+		result = 'point0'
+	}
+	if (whiteFictionalPoints.includes(result)) {
+		result = 'point25'
+	}
+	return result
+}
+
 
 function gridLookup(point, position, axis) {
 	if (axis === 'left') {
@@ -259,11 +350,11 @@ function gridLookup(point, position, axis) {
 			top = {0: 228, 1: 211, 2: 188, 3: 171, 4: 154, 
 					5: 154, 6: 154, 7: 154, 8: 154, 9: 154, 
 					10: 154, 11: 154, 12: 154, 13: 154, 14: 154}
-		} else if (point.toString() === 'point0') {
+		} else if (point.toString() === 'point25') {
 			top = {0: 20, 1: 28, 2: 36, 3: 44, 4: 52, 
 					5: 60, 6: 68, 7: 76, 8: 84, 9: 92, 
 					10: 100, 11: 108, 12: 116, 13: 124, 14: 132}
-		} else if (point.toString() === 'point25') {
+		} else if (point.toString() === 'point0') {
 			top = {0: 270, 1: 278, 2: 286, 3: 294, 4: 302, 
 					5: 310, 6: 318, 7: 326, 8: 334, 9: 342, 
 					10: 350, 11: 358, 12: 366, 13: 374, 14: 382}
@@ -283,56 +374,9 @@ function gridLookup(point, position, axis) {
 }
 
 
-
-
-
-// plyr = whoseTurn()
-// at the beginning of any given turn 
-
-// play turns
-	// for a given piece, return legal moves
-	// buld a move, submit it or cancel it
-// trigger a win
-	// a while loop which breaks when either player's home is not full
-	// when it's full, a variable is assigned to the player's object,
-	// an if statement in the turn function handles it from there
-
-
-// roll dice - determine how many moves (4 if doubles, 2 otherwise)
-// make a player's pieces clickable
-// when they click a piece, move that into the turn builder's first spot
-// if they click another piece on the same point, 
-// also move that into the turn builder's second spot
-// if they click the same piece again, or a piece on another point,
-// move it out of the turn builder's spot
-
-// if their turn builder puts all of their pieces in their home, they win right away
-
-// if they click undo, empty turn builder
-// if they click submit, commit the turn builder
-// check if they win the game
-// next turn!
-// and on an on until the winner variable has some value
-
-
-// possible moves
-
-// ramifications of move (process move)
-
-// For every point my dice can get me to
-
-// >is empty
-// 	move there
-// >has one piece of another color
-// 	eat it
-// >has more than one piece of another color
-// 	can't move there
-
-
-
 /*
 
-* right now barred is hard coded, and the move manages setting and
+* right now barred is hard-coded, and the move manages setting and
 resetting it. It might be easier if that were a function, and each
 player object could figure out if it was barred or not based on the 
 preview board... that's where there's some drama regarding when you
