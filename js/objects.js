@@ -11,7 +11,6 @@ var Player = function(name, color) {
 	this.home = this.color === 'white' ? 'point25' : 'point0'
 	// point used as the bar - opposite of home
 	this.barCountOut = this.color === 'white' ? 'point0' : 'point25'
-	this.turn = false
 	// all in home quadrant
 	this.homeStretch = false
 	// has pieces on the bar
@@ -71,6 +70,7 @@ var Turn = function(player) {
 		var msg = this.moves.length === 0 ? "No moves left to undo" : "Removed the most recent move."
 		this.moves.splice(-1).restorePlayer
 		console.log(msg)
+		this.updatePreview()
 	}
 	this.updatePreview = function() {
 		// makes a copy of the global board object in its current state
@@ -92,7 +92,6 @@ var Turn = function(player) {
 		}
 	}
 	this.possibleMoves = function() {
-		this.updatePreview()
 		var possible = []
 		// check if the player has pieces on the bar
 		if (this.player.barred) {
@@ -133,7 +132,7 @@ var Turn = function(player) {
 		} else {
 			for (var point in preview) {
 				for (var piece in preview[point]) {
-					if (preview[point][piece].player.color === this.player.color ) {
+					if (preview[point][piece].player === this.player) {
 						for (var dice in this.availableResources) {
 							var countOut = 'point' + 
 											eval(point.slice(5) + 
@@ -141,7 +140,7 @@ var Turn = function(player) {
 											this.availableResources[dice]).toString()
 							// it's possible if the point is not occupied 
 							// AND the point is not the player's home
-							if (!isOccupied(point, preview, this.player) && countOut !== this.player.home) {
+							if (!isOccupied(countOut, preview, this.player) && countOut !== this.player.home) {
 								console.log(point + ' to ' + countOut)
 								possible.push(new Move(preview[point][piece], countOut))
 							}				
@@ -152,7 +151,7 @@ var Turn = function(player) {
 		}
 		return possible
 	}
-	this.commit = function() {
+	this.commitToBoard = function() {
 		// sets "objective" board to whatever the preview board is
 		this.updatePreview()
 		board = preview

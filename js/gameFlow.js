@@ -42,6 +42,7 @@ function newGame(whiteName, blackName) {
 	board.point6 = blackPieces.splice(-5)
 	board.point1 = whitePieces.splice(-2)
 	console.log('Assigned pieces to their point arrays.')
+	console.log('--------------------------')
 }
 
 ///// Gameplay Functions /////
@@ -57,118 +58,103 @@ function openingRoll() {
  		openingRoll()
  	} else if (white.dice[0].value > black.dice[0].value) {
  		white.dice[1].value = black.dice[0].value
-		white.turn = true
 		console.log(white.name + ' goes first.')
 		console.log('--------------------------')
+		turnBuilder(white)
 	} else if (white.dice[0].value < black.dice[0].value) {
 		black.dice[1].value = white.dice[0].value
-		black.turn = true
 		console.log(black.name + ' goes first.')
 		console.log('--------------------------')
+		turnBuilder(black)
 	} else {
 		console.log('!!! the openingRoll function is broken.')
 	}
 }
 
 // creates a new turn object and builds moves for it
-function startTurn(player) {
+function turnBuilder(player) {
 	thisTurn = new Turn(player) 
 	thisTurn.updatePreview()
 	console.log(player.name + ' may move ' + thisTurn.availableResources.join(', '))
-	activateBoard()
+	
+	// no more resources, no more possible moves
+	if (thisTurn.availableResources.length === 0 || thisTurn.possibleMoves().length === 0) {
+		
+		// the player can't do anything, acknowledge that, next turn
+		if (thisTurn.moves.length === 0) {
+			console.log('Sorry, ' + thisTurn.player.name + ' there are no possible moves for you.')
+			// roll the other player's dice
+			getOtherPlayer(thisTurn.player).dice[0].roll()
+			getOtherPlayer(thisTurn.player).dice[1].roll()
+			// start a new turn with whoever is not this player
+			turnBuilder(getOtherPlayer(thisTurn.player))
+		
+		// the player has exhausted all possible moves, provide commit option
+		} else {
+
+			// the player has not used all of their dice
+			if (thisTurn.availableResources.length !== 0) {
+				// display commit button
+				console.log('No more possible moves. Feel free to undo and try other moves.')
+				
+				// while the commit button is clicked
+				// remove the commit button
+				// roll the other player's dice
+				getOtherPlayer(thisTurn.player).dice[0].roll()
+				getOtherPlayer(thisTurn.player).dice[1].roll()
+				// start a new turn with whoever is not this player
+				turnBuilder(getOtherPlayer(thisTurn.player))
+				
+			// the player has used all of their dice, provide commit option	
+			} else {
+				// display commit button
+				console.log("You've used all of your dice!")
+				
+				// while the commit button is clicked
+				// remove the commit button
+				// roll the other player's dice
+				getOtherPlayer(thisTurn.player).dice[0].roll()
+				getOtherPlayer(thisTurn.player).dice[1].roll()
+				// start a new turn with whoever is not this player
+				turnBuilder(getOtherPlayer(thisTurn.player))
+			}
+		}
+	}
+
+	moveBuilder(thisTurn)
 }
 
-// Okay now it's time to make this a little easier to interact with
-// I have an array of move objects - which all have location and destination. 
-// If I click on a piece, I can narrow down the moves,
-// If I click a point, I can also narrow down the moves
-// I want to dynamically add "clickability" to pieces and moves.
-// At this point, I have the information to do that. 
-// I'll need a callback function as an event listener, which gives
-// information to another, more general
 
+function moveBuilder() {
+	// get all possible moves
+	// var move
+	// make pieces and points clickable
+	// if player clicks a piece or a point
+	// calculate remaining moves
+	// if a player clicks the same thing - clear and restart
+	// if a player clicks the same kind of thing - if it's on the same point, and has possible moves
+	//												special case where this will commit two moves
+	// if a player clicks the same kind of thing - and no possible moves... this should never happen
+	// if a player clicks a different kind of thing - push the move to the turn and update the board
+	// pass it on to the turn builder
+}
 
-
-
-
-// // makes pieces build a move on click
-// function activatePieces() {
-// 	var $pieces = $('.' + thisTurn.player.color + '-piece')
-// 	$pieces.addClass('active')
-// 	$pieces.on('click', moveBuilder)
-// 	console.log(thisTurn.player.name + "'s pieces are clickable.")
-// }
-
-// // facilitates creating new move objects with DOM clicks
-// function moveBuilder(){
-// 	if (this.id.substring(0,5) === thisTurn.player.color) {
-// 		move = new Move(DOMtoPiece(this.id), 'point0')
-// 		move.location = DOMtoPosition(this.id, preview)
-// 		console.log('Created a new move with ' + this.id)
-// 		thisTurn.moves.push(move)
-// 		// deactivate pieces
-// 		deactivatePieces()
-// 		//activate points.
-// 		activatePoints()
-// 	} else if (this.class === 'point') {
-// 		thisTurn.moves.slice(-1)[0]
-// 	} else {
-// 		console.log('!!! passed an invalid DOM node to moveBuilder')
-// 	}
-// }
-
-// function deactivatePieces() {
-// 	var $pieces = $('.' + thisTurn.player.color + '-piece')
-// 	$pieces.removeClass('active')
-// 	$pieces.off()
-// 	console.log(thisTurn.player.name + "'s pieces are no longer clickable.")
-// }
-
-// // as it turns out, this is where most of the rules are going
-// function activatePoints() {
-// 	var start = parseInt(thisTurn.moves.slice(-1)[0].location.slice(5))
-// 	var dice = thisTurn.availableResources
-// 	var points = []
-// 	// get all possible moves
-// 	switch(thisTurn.player.color) {
-// 	// if a player doesn't have all pieces in their home quadrant, 
-// 	// don't add home
-// 		case 'white':
-// 			for (var i = 0; i < dice.length; i++) {
-// 				var result
-// 				// for white, you ADD to move to home
-// 				result = 'point' + (start + dice[i]).toString()
-// 				if (result === 'point25') {
-// 					if (thisTurn.player.homeStretch) points.push('point25')
-// 				} else if (result !== 'point0') {
-// 					points.push(result)
-// 				}
-// 			}
-// 			break
-// 		case 'black':
-// 			for (var i = 0; i < dice.length; i++) {
-// 				var result
-// 				// for black, you SUBTRACT to move to home
-// 				result = 'point' + (start - dice[i]).toString()
-// 				if (result === 'point0') {
-// 					if (thisTurn.player.homeStretch) points.push('point0')
-// 				} else if (result !== 'point25') {
-// 					points.push(result)
-// 				}
-// 			}
-// 			break
-// 	}
-// 	// remove occupied points
-
-
-// 	// $points.on('click', moveBuilder)
-// 	console.log(points.join(', ') + " are clickable.")
-// }
-
-
-function nextTurn() {
-	white.turn = !white.turn
-	black.turn = !black.turn
+// function for updating clickable things on the board
+// takes an array of move objects
+function updateClickable(arr) {
+	var clickable = []
+	for (var i = 0; i < arr.length; i++) {
+		if (clickable.indexOf(arr[i].piece.declare()) === -1) clickable.push(arr[i].piece.declare())
+		if (clickable.indexOf(arr[i].destination) === -1) clickable.push(arr[i].destination)
+	}
+	// make sure there are no errant classes and listeners
+	$('.piece, .point').off()	
+	$('.piece, .point').removeClass('active')	
+	// if clickable is empty, don't make anything active
+	if (clickable.length > 0) {	
+		// add classes and listeners
+		$('#' + clickable.join(',#')).addClass('active')	
+	}
 }
 
 ///// Game End Functions /////
@@ -184,8 +170,6 @@ function runGame() {
 	newGame('Nora', 'Gus')
 	visualizeBoard(board)
 	openingRoll()
-	var activePlayer = whoseTurn()
-	startTurn(activePlayer)
 }
 runGame()
 
@@ -210,7 +194,6 @@ function visualizeBoard(brd) {
 		}
 	}
 	console.log('!!! updated the DOM with visualizeboard')
-	console.log('--------------------------')
 }
 
 function DOMtoPiece(id) {
@@ -233,10 +216,10 @@ function DOMtoPosition(id, brd) {
 // other player, and so cannot be moved to
 function isOccupied(point, brd, thisPlayer) {
 	if (brd[point].length > 1) {
-		if (brd[point][0].player.color !== thisPlayer.color) {
-			return true
+		if (brd[point][0].player === thisPlayer) {
+			return false
 		} else {
-			return false 
+			return true 
 		}
 	} else {
 		return false
@@ -310,9 +293,6 @@ function gridLookup(point, position, axis) {
 		console.log('!!! passed ' + axis.toString() + ' to gridLookup')
 	}
 }
-
-
-
 
 
 
@@ -403,3 +383,5 @@ That is displayed all throughout the game.
 * is math.random.floor really a fair random engine? Look into that, might be worth finding a better solution.
 
 */
+
+
