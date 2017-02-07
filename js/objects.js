@@ -5,26 +5,34 @@ console.log('objects.js connected')
 var Player = function(name, color) {
 	this.name = name
 	this.color = color
+	this.dice = [] 
+
 	// operator used to advance up/down the board
 	this.operand = this.color === 'white' ? '+' : '-'
+
 	// point number of this player's home
 	this.home = this.color === 'white' ? 'point25' : 'point0'
+
 	// point used as the bar - opposite of home
 	this.barCountOut = this.color === 'white' ? 'point0' : 'point25'
+
 	// all in home quadrant
 	this.homeStretch = false
+
 	// has pieces on the bar
 	this.barred = false
-	this.dice = [] 
 }
 
 var Dice = function(){
 	this.value = NaN
+
+	// gives the die a new random value
 	this.roll = function () {
 		this.value = Math.floor(Math.random() * 6) + 1
 	}
+
+	// returns a description of the dice's value as a string
 	this.declare = function() {
-		// returns a description of the dice's value as a string
 		return this.value.toString()
 	}
 }
@@ -32,8 +40,10 @@ var Dice = function(){
 var Piece = function(id, player) {
 	this.id = id
 	this.player = player
+
+	// returns a description of the piece's attributes as a string
+	// in the same format as the corresponding DOM node
 	this.declare = function() {
-		// returns a description of the piece's attributes as a string
 		return this.player.color + this.id.toString()
 	}
 }
@@ -57,11 +67,16 @@ var BackgammonBoard = function() {
 
 var Turn = function(player) {
 	this.player = player
+	
+	// uses the player's dice to see if they match, are 'doubles'
 	this.doubles = (player.dice[0].value === player.dice[1].value) ? true : false
+	
+	// determines what dice the player can play with
 	this.availableResources = this.doubles ?
 					 [player.dice[0].value, player.dice[0].value, player.dice[0].value, player.dice[0].value] :
-					 [player.dice[0].value, player.dice[1].value]
+					 [player.dice[0].value, player.dice[1].value]					 
 	this.expendedResources = []
+
 	this.moves = []
 	this.undo = function() {
 		// pop the last move
@@ -120,7 +135,7 @@ var Turn = function(player) {
 							// it's possible if the point is not occupied 
 							// AND the point is not the player's home
 							if (!isOccupied(point, preview, this.player)) {
-								console.log(point + ' to ' + countOut)
+								console.log(board[point][piece].declare() + ' to ' + countOut)
 								possible.push(new Move(preview[point][piece], countOut))
 							}				
 						}
@@ -141,7 +156,7 @@ var Turn = function(player) {
 							// it's possible if the point is not occupied 
 							// AND the point is not the player's home
 							if (!isOccupied(countOut, preview, this.player) && countOut !== this.player.home) {
-								console.log(point + ' to ' + countOut)
+								console.log(board[point][piece].declare() + ' to ' + countOut)
 								possible.push(new Move(preview[point][piece], countOut))
 							}				
 						}

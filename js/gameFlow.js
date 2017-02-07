@@ -173,18 +173,6 @@ function runGame() {
 }
 runGame()
 
-
-function whoseTurn() {
-	if (white.turn) {
-		return white
-	} else if (black.turn) {
-		return black
-	} else {
-		console.log("!!! whoseTurn returned null.")
-		return null
-	}
-}
-
 function visualizeBoard(brd) {
 	for (var point in brd) {
 		for (var i in brd[point]) {
