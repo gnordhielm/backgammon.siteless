@@ -85,12 +85,14 @@ function turnBuilder(player) {
 
 
 function moveBuilder() {
+
+	thisTurn.player.updateState()
 	thisMoves = thisTurn.possibleMoves()
 
 	// no more resources, no more possible moves
-	if (thisTurn.availableResources.length === 0 || thisMoves.length === 0) {
+	if (thisMoves.length === 0) {
 		
-		// the player can't do anything, acknowledge that, next turn
+		// the player hasn't been able to do anything this turn, acknowledge that, next turn
 		if (thisTurn.moves.length === 0) {
 			console.log('Sorry, ' + thisTurn.player.name + ' there are no possible moves for you.')
 			endTurn()
@@ -162,6 +164,9 @@ function updateClickable(arr, timesThrough) {
 				}
 			updateClickable(thisMoves, 2)
 
+			// in cases where, after the first winnow, only one move remains, play it.
+			if (thisMoves.length === 1) endMove()
+
 			// second time through
 			} else if (timesThrough === 2) {
 				// is this a piece or a point?
@@ -206,6 +211,7 @@ function winnowMoves(type, id) {
 
 // handles the transition into the next move
 function endMove() {
+
 	// make sure nothing is clickable
 	updateClickable([], 3)
 	// push this move to the turn
@@ -233,6 +239,12 @@ function endTurn() {
 }
 
 ///// Game End Functions /////
+
+function endGame(winner) {
+	// by the bar and the number of pieces in the other player's home
+	// if it was a win, gammon, or backgammon
+	alert(winner.name + " wins the whole damn game!")
+}
 
 //reset the board
 //	reset global variables
@@ -309,21 +321,35 @@ function getPieces(player) {
 	return pieces
 }
 
+// returns true if a player has a piece on the given point on the preview board
+function isThere(player, point) {
+		for (var i in preview[point]) {
+			if (preview[point][i].player === player) return true
+		}
+	return false
+}
+
+
 // given a roll, a player, and a starting position, returns the end position 
 function projectMove(start, roll, player) {
-	var result = 'point' + eval(start.slice(5) + player.operand + roll).toString()
-	var blackFictionalPoints = ['point-1','point-2','point-3','point-4','point-5','point-6']
-	var whiteFictionalPoints = ['point26','point27','point28','point29','point30','point31']
-	// makes sure countOut is actually the board
-	if (blackFictionalPoints.includes(result)) {
-		result = 'point0'
-	}
-	if (whiteFictionalPoints.includes(result)) {
-		result = 'point25'
+	var result
+	// if the player is barred, project differently
+	if (player.barred) {
+		result = 'point' + eval(player.barCountOut.slice(5) + player.operand + roll).toString()
+	} else {
+		result = 'point' + eval(start.slice(5) + player.operand + roll).toString()
+		var blackFictionalPoints = ['point-1','point-2','point-3','point-4','point-5','point-6']
+		var whiteFictionalPoints = ['point26','point27','point28','point29','point30','point31']
+		// makes sure countOut is actually the board
+		if (blackFictionalPoints.includes(result)) {
+			result = 'point0'
+		}
+		if (whiteFictionalPoints.includes(result)) {
+			result = 'point25'
+		}
 	}
 	return result
 }
-
 
 function gridLookup(point, position, axis) {
 	if (axis === 'left') {
