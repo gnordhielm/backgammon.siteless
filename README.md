@@ -14,11 +14,23 @@ Time permitting, I also want to implement a very clean, responsive, two-machine 
 
 My MVP is a game of backgammon two players can play on one machine. Pleasing CSS and responsiveness aside, it simply needs to take the players through a game - letting them click to make moves, and obeying the rules of the game. Pieces will change position to reflect the state of the game, and an alert will fire when a player wins the game.
 
-## Tecnologies To Be Used
+## To Dos
 
-Beyond the standard web technologies (`HTML`,`CSS`,and `JavaScript`), I will also be making use of the `jQuery` library.
+These features aren't essential to the useability of the app, but I'd like to implement them at some point in the future.
 
-If I make it to my strech goals, I will use `Firebase` as a simple database solution, and `angular.js` to ennable a smooth game without page reloads.
+* Options for spectators to join a game - at setup or while it's in progress - as spectators.
+* An 'I want to play the next game' button that lets spectators indicate that they'd like to play. The result of a click on that button would be displayed on the game-end modal.
+* Allow users to, after rolling doubles, click and collect many pieces on the same point and deposit them with one click.
+* Support multiple games at once - users could share a code with their opponent. 
+* A 'nudge' button which shows up if your opponent hasn't played in over a minute. Offers some kind of reminder on the opponent's end. 
+* Elaborate, photographic skins for the game - including integrated video of hands casting die, signaling a 'nudge'.
+* A 'stakes' feature which allows users to make it explicit if the game is being played to settle an argument - or debt...
+* Clicked pieces could follow the cursor around until placed.
+* A better random engine - I'll have to look into this, but I think there is something mathematically wrong with Math.random. It doesn't behave like real dice, at any rate.
+
+## Tecnologies Used
+
+Beyond the standard web technologies - **HTML**, **CSS**, and **JavaScript** - this project also uses **jQuery** and **Firebase**.
 
 ## Process 
 

@@ -1,6 +1,11 @@
 /*
 COLORS
 
+4d2c3d PURPLE
+eae3ea LIGHT PURPLE
+ab9353 BRONZE/GOLD
+57652a OLIVE
+155765 TEAL
 
 */
 
@@ -9,8 +14,10 @@ COLORS
 /* Universal */
 
 body {
-	width: 100%;
 	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
 }
 
 *{
@@ -21,6 +28,8 @@ body {
 
 .wrapper {
 	display: none;
+	position: absolute;
+	z-index: 0;
 
 	width: 100%;
 	height: 100%;
@@ -28,15 +37,62 @@ body {
 
 .active-wrapper {
 	display: block;
+	position: absolute;
+	z-index: 0;
+
+	width: 100%;
+	height: 100%;
 }
 
 #setup {
-	background-color: 
+	background-color: #eae3ea;
 }
 
 /* Modals */
 
+.modal {
+	display: none;
+	position: absolute;
+	z-index: 1;
 
+	padding: 10px;
+	text-align: center;
+
+	background-color: #eae3ea;
+	border: 5px solid #4d2c3d;
+
+/* centers the modal */
+	width: 300px;
+    top: 100px;
+    margin-left:-165px;
+    left:50%;
+}
+
+.modal .names {
+	height: 50px;
+	margin: 10px 20px;
+}
+
+.modal input[type=submit] {
+	background-color: #eae3ea;
+	display: none;
+
+}
+
+.modal img {
+	float:left;
+	width: 25px;
+	margin-right: -25px;
+}
+
+
+
+.active-modal {
+	display: block;
+}
+
+#welcome-setup {
+}
 
 
 /* Game Pieces and Board */

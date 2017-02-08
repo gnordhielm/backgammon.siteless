@@ -1,5 +1,8 @@
 console.log('gamelogic.js connected')
 
+// Going forward, it's important to think from the perspective of the client: what information
+// does this browser need to make the game work
+
 // Thank God 'piece', 'point', 'white', and 'black' are all five letters long...
 
 ///// Global Variables /////
@@ -14,7 +17,14 @@ var thisMoves // array of possible move objects
 var white // object for player one
 var black // object for player two
 
+
+
+
 ///// Game Setup Functions /////
+
+
+
+
 
 function newGame(whiteName, blackName) {
 	white = new Player(whiteName, 'white')
@@ -477,48 +487,5 @@ function gridLookup(point, position, axis) {
 		console.log('!!! passed ' + axis.toString() + ' to gridLookup')
 	}
 }
-
-
-/*
-
-* right now barred is hard-coded, and the move manages setting and
-resetting it. It might be easier if that were a function, and each
-player object could figure out if it was barred or not based on the 
-preview board... that's where there's some drama regarding when you
-update the preview board. Maybe I could have it return the objective
-board... but then I'll have to check it against the preview board and
-who wants that.
-
-* a graphic should come up and tell you which direction you'll move at game start.
-might not be neccesary when dashboard is working?
-
-
-* When this gets more visually interesting, pieces in the move builder should be locked
-to the pointer of the player, so when the final click happens they can just rest right
-at whatever spot they were put at
-
-
-
-
-* A "can I take that back" button - which simply alerts you with "no"
-
-
-* A "stakes" feature, where at setup, I ask - what issue is this game going to settle?
-
-"Who does the dishes."
-"Who's the better beatboxer."
-"Whether Livia really poisoned Augustus with figs."
-
-That is displayed all throughout the game.
-
-++ if I have the program read "who", and pop a name in there on game win
-	or ask who's on what side of an issue - there could be two inputs
-	if I see "whether", or "what", maybe I could direct the players to an
-	interface that takes two inputs
-
-
-* is math.random.floor really a fair random engine? Look into that, might be worth finding a better solution.
-
-*/
 
 
