@@ -8,7 +8,7 @@ var Player = function(name, color) {
 	this.dice = [] 
 
 	// operator used to advance up/down the board
-	this.operand = this.color === 'white' ? '+' : '-'
+	this.operator = this.color === 'white' ? '+' : '-'
 
 	// point number of this player's home
 	this.home = this.color === 'white' ? 'point25' : 'point0'
@@ -16,21 +16,20 @@ var Player = function(name, color) {
 	// point used as the bar - opposite of home
 	this.barCountOut = this.color === 'white' ? 'point0' : 'point25'
 
-	// all in home quadrant
-	this.homeStretch = false
-
 	// has pieces on the bar
 	this.barred = false
 
+	// all in home quadrant
+	this.homeStretch = false
+
+	// all pieces in home
+	this.hasWon = false
+
 	// updates homeStretch and barred based on the state of the board.
 	this.updateState = function() {
-		this.homeStretch = areAllInHomeStretch(this)
 		this.barred = isThere(this, 'bar') ? true : false
-	}
-	
-	// triggers a win of the game
-	this.winsGame = function() {
-		endGame(this)
+		this.homeStretch = areAllInHomeStretch(this)
+		this.hasWon = areAllInHome(this)
 	}
 }
 
@@ -93,9 +92,9 @@ var Turn = function(player) {
 		// pop the last move - because a move can become retroactively illegal 
 		// if an earlier move is undone, undos must happen in order
 		var msg = this.moves.length === 0 ? "No moves left to undo." : "Removed the most recent move."
-		this.moves.splice(-1)[0].restorePlayers()
 		console.log(msg)
 		this.updatePreview()
+		this.player.updateState()
 	}
 	this.updatePreview = function() {
 		// makes a copy of the global board object in its current state
@@ -104,7 +103,8 @@ var Turn = function(player) {
 		// since you reset the board before each preview, also reset the resources
 		this.expendedResources = []
 		this.availableResources = this.doubles ?
-				 [this.player.dice[0].value, this.player.dice[0].value, this.player.dice[0].value, this.player.dice[0].value] :
+				 [this.player.dice[0].value, this.player.dice[0].value, 
+				 	this.player.dice[0].value, this.player.dice[0].value] :
 				 [this.player.dice[0].value, this.player.dice[1].value]	
 		if (this.moves.length) {
 			for (var i = 0; i < this.moves.length; i++) {
@@ -145,7 +145,6 @@ var Turn = function(player) {
 				if (preview.bar[i].player === this.player ) {
 					for (var j = 0; j < this.availableResources.length; j++) {
 						var projection = projectMove(point, this.availableResources[j], this.player)
-						console.log(projection)
 						if (!isOccupied(projection, preview, this.player)) possible.push(new Move(preview.bar[i], projection))			
 					}
 				}
@@ -161,7 +160,8 @@ var Turn = function(player) {
 						// AND the point is not the player's home
 						// unless they are in home stretch
 						if (this.player.homeStretch) {
-							if (!isOccupied(projection, preview, this.player)) {
+							if (!isOccupied(projection, preview, this.player) && 
+								projection !== 'overshoot') {
 								possible.push(new Move(preview[point][piece], projection))
 							}
 						} else {
@@ -185,7 +185,8 @@ var Turn = function(player) {
 							// AND the point is not the player's home
 							// unless they are in home stretch
 							if (this.player.homeStretch) {
-								if (!isOccupied(projection, preview, this.player)) {
+								if (!isOccupied(projection, preview, this.player) && 
+								projection !== 'overshoot') {
 									possible.push(new Move(preview[point][piece], projection))
 								}
 							} else {

@@ -86,7 +86,11 @@ function turnBuilder(player) {
 
 function moveBuilder() {
 
+	// reflect the last move in the state of the player
 	thisTurn.player.updateState()
+	// end game from here if someone has won
+	if (thisTurn.player.hasWon) endGame(thisTurn.player)
+	// set up for next move, given the the previous moves
 	thisMoves = thisTurn.possibleMoves()
 
 	// no more resources, no more possible moves
@@ -241,6 +245,10 @@ function endTurn() {
 ///// Game End Functions /////
 
 function endGame(winner) {
+
+	// commit the most recent player's moves
+	thisTurn.commitToBoard()
+
 	// by the bar and the number of pieces in the other player's home
 	// if it was a win, gammon, or backgammon
 	alert(winner.name + " wins the whole damn game!")
@@ -290,6 +298,8 @@ function DOMtoPosition(id, brd) {
 // checks to see if a spot on the given board is occupied by the
 // other player, and so cannot be moved to
 function isOccupied(point, brd, thisPlayer) {
+	// if this gets passed overshoot, just return false
+	if (point === 'overshoot') return false
 	if (brd[point].length > 1) {
 		if (brd[point][0].player === thisPlayer) {
 			return false
@@ -329,22 +339,91 @@ function isThere(player, point) {
 	return false
 }
 
+// returns true if a player has all of their pieces in the home stretch
+function areAllInHomeStretch(player) {
+	if (player.barred) { return false }
+	var points = [ 
+	'bar',
+
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 1).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 2).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 3).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 4).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 5).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 6).toString(),
+
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 7).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 8).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 9).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 10).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 11).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 12).toString(),
+
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 13).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 14).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 15).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 16).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 17).toString(),
+	'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + 18).toString()
+	]
+	for (var i = 0; i < points.length; i++) {
+		if (isThere(player, points[i])) return false
+	}
+	return true
+}
+
+// returns true if a player's pieces are all home
+function areAllInHome(player) {
+	if (player.barred) { return false }
+	if (!player.homeStretch) { return false }
+	if (preview[player.home].length === 15) { 
+		return true 
+	} else {
+		return false
+	}
+}
 
 // given a roll, a player, and a starting position, returns the end position 
 function projectMove(start, roll, player) {
 	var result
+	var blackFictionalPoints = ['point-1','point-2','point-3','point-4','point-5','point-6']
+	var whiteFictionalPoints = ['point26','point27','point28','point29','point30','point31']
+	var overshoot
 	// if the player is barred, project differently
 	if (player.barred) {
-		result = 'point' + eval(player.barCountOut.slice(5) + player.operand + roll).toString()
+		result = 'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + roll).toString()
+	// if the player is in their home stretch, project differently
+	} else if (player.homeStretch) {
+		result = 'point' + eval(start.slice(5) + player.operator + roll).toString()
+		// calculate 'overshoot' for the particular player
+		if (blackFictionalPoints.indexOf(result) !== -1) overshoot = blackFictionalPoints.indexOf(result) + 1
+		if (whiteFictionalPoints.indexOf(result) !== -1) overshoot = whiteFictionalPoints.indexOf(result) + 1
+		
+		// check if there is overshoot, if not don't mess with the result
+		if (overshoot > 0) {
+			// compare overshoot to the distance of the farthest occupied point
+			// the order of this array is very important - needs to count outward
+			var farthestArr = [
+				'point' + eval(player.home.slice(5) + getOtherPlayer(player).operator + ' ' + 1).toString(),
+				'point' + eval(player.home.slice(5) + getOtherPlayer(player).operator + ' ' + 2).toString(),
+				'point' + eval(player.home.slice(5) + getOtherPlayer(player).operator + ' ' + 3).toString(),
+				'point' + eval(player.home.slice(5) + getOtherPlayer(player).operator + ' ' + 4).toString(),
+				'point' + eval(player.home.slice(5) + getOtherPlayer(player).operator + ' ' + 5).toString(),
+				'point' + eval(player.home.slice(5) + getOtherPlayer(player).operator + ' ' + 6).toString()
+			]
+			var farthest
+			for (var i = 0; i < farthestArr.length; i++) {
+				if (isThere(player, farthestArr[i])) farthest = i + 1
+			}
+			// if the dice equals or is less than the farthest occupied point, return overshoot
+			if (roll <= farthest) result = 'overshoot'
+		}
 	} else {
-		result = 'point' + eval(start.slice(5) + player.operand + roll).toString()
-		var blackFictionalPoints = ['point-1','point-2','point-3','point-4','point-5','point-6']
-		var whiteFictionalPoints = ['point26','point27','point28','point29','point30','point31']
-		// makes sure countOut is actually the board
+		result = 'point' + eval(start.slice(5) + player.operator + roll).toString()
+		// makes sure countOut is actually the board, flattens it to home (which will not be allowed)
 		if (blackFictionalPoints.includes(result)) {
 			result = 'point0'
-		}
-		if (whiteFictionalPoints.includes(result)) {
+		} else if (whiteFictionalPoints.includes(result)) {
 			result = 'point25'
 		}
 	}
