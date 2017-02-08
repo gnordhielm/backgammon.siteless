@@ -1,3 +1,12 @@
+/*
+COLORS
+
+
+*/
+
+
+
+/* Universal */
 
 body {
 	width: 100%;
@@ -7,6 +16,30 @@ body {
 *{
 	transition: all 0.15s linear;
 }
+
+/* Wrappers */
+
+.wrapper {
+	display: none;
+
+	width: 100%;
+	height: 100%;
+}
+
+.active-wrapper {
+	display: block;
+}
+
+#setup {
+	background-color: 
+}
+
+/* Modals */
+
+
+
+
+/* Game Pieces and Board */
 
 #board {
 	z-index: 1;
