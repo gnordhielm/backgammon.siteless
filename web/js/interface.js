@@ -1,4 +1,4 @@
-
+console.log('interface.js connected')
 ///// DOM Selectors /////
 
 // Welcome Modal
@@ -29,7 +29,9 @@ $pcsHomeSpan = $('#pcs-home')
 $pcsBarSpan = $('#pcs-bar')
 
 $playAgainButton = $('#play-again')
+// go back to opening roll
 $leaveButton = $('#leave-game')
+// go back to signin
 
 
 ///// Read From the Database /////
@@ -100,6 +102,7 @@ function setUpGame() {
 			$setUpDiv.append('<p id="your-name" class="name">' + gameData.whiteName + '</p>')
 			$yourStatusImg.prop('src', './assets/ready_white.png') 
 		} else {
+			$yourStatusImg.prop('src', './assets/unready_black.png') 
 			// the player will commit their name to blackName
 			$opponentName.text(gameData.whiteName)
 			$opponentStatusImg.prop('src', './assets/ready_white.png') 
@@ -219,21 +222,40 @@ function openingRoll() {
 		} else if (!!gameData.whiteOpener && !!gameData.blackOpener) {
 			// render their roll
 			$openingBlackDice.attr('src', './assets/black_' + gameData.blackOpener.toString() + '.png')
-			// compare the results
-			var message = gameData.whiteOpener > gameData.blackOpener ? 
-							gameData.whiteName + " goes first!" : gameData.blackName + " goes first!"
-			$openingRollMsg.text(message)
-			// move to the next controller phase
-			setTimeout(function(){
-				gameData.controllerToken = 2
-				// set the first player and first roll
-				// START THURSDAY
-				// how should I model this information, given that it's the actual beginning of gameplay?
-
-
-				// commit the changes
-				databaseRef.set(gameData)
-			}, 1000)
+			// if the results are equal, start the hell over
+			if (gameData.whiteOpener === gameData.blackOpener) {
+				// DOM stuff, everybody has to do this.
+				$openingRollMsg.text("It's a tie, roll again.")
+				setTimeout(function(){
+					$openingWhiteDice.attr('src', './assets/white_naked.png')
+					$openingBlackDice.attr('src', './assets/black_naked.png')
+					// reset the dice
+					gameData.whiteOpener = null
+					gameData.blackOpener = null
+					// commit the changes
+					databaseRef.set(gameData)
+				}, 500)
+			} else {			
+				// compare the results
+				// alter the DOM
+				if (gameData.whiteOpener > gameData.blackOpener) {
+				 	// if white goes first
+					$openingRollMsg.text(gameData.whiteName + " goes first!")
+					$openingBlackDice.attr('src', './assets/white_' + gameData.blackOpener.toString() + '.png')
+				} else {
+				 	// if black goes first
+					$openingRollMsg.text(gameData.blackName + " goes first!")
+					$openingWhiteDice.attr('src', './assets/black_' + gameData.whiteOpener.toString() + '.png')
+				}
+				// move to the next controller phase
+				setTimeout(function(){
+					// hand over important information
+					gameData.currentTurn = gameData.whiteOpener > gameData.blackOpener ? "white" : "black"
+					gameData.controllerToken = 3
+					// commit the changes
+					databaseRef.set(gameData)
+				}, 1000)
+			}
 		}
 
 	} else if (myColor === 'black') {
@@ -290,10 +312,27 @@ function openingRoll() {
 		} else if (!!gameData.whiteOpener && !!gameData.blackOpener) {
 			// render their roll
 			$openingWhiteDice.attr('src', './assets/white_' + gameData.whiteOpener.toString() + '.png')
-			// compare the results
-			var message = gameData.whiteOpener > gameData.blackOpener ? 
-							gameData.whiteName + " goes first!" : gameData.blackName + " goes first!"
-			$openingRollMsg.text(message)
+			// if the results are equal, start the hell over
+			if (gameData.whiteOpener === gameData.blackOpener) {
+				// DOM stuff, everybody has to do this.
+				$openingRollMsg.text("It's a tie, roll again.")
+				setTimeout(function(){
+					$openingWhiteDice.attr('src', './assets/white_naked.png')
+					$openingBlackDice.attr('src', './assets/black_naked.png')
+				}, 500)
+			} else {			
+				// compare the results
+				// alter the DOM
+				if (gameData.whiteOpener > gameData.blackOpener) {
+				 	// if white goes first
+					$openingRollMsg.text(gameData.whiteName + " goes first!")
+					$openingBlackDice.attr('src', './assets/white_' + gameData.blackOpener.toString() + '.png')
+				} else {
+				 	// if black goes first
+					$openingRollMsg.text(gameData.blackName + " goes first!")
+					$openingWhiteDice.attr('src', './assets/black_' + gameData.whiteOpener.toString() + '.png')
+				}
+			}
 		}
 
 	} else {
@@ -307,21 +346,37 @@ function openingRoll() {
 			$openingBlackDice.attr('src', './assets/black_' + gameData.blackOpener.toString() + '.png')
 		}
 		if (!!gameData.whiteOpener && !! gameData.blackOpener){
-			var message = gameData.whiteOpener > gameData.blackOpener ? 
-							gameData.whiteName + " goes first!" : gameData.blackName + " goes first!"
-			$openingRollMsg.text(message)
+			// if the results are equal, start the hell over
+			if (gameData.whiteOpener === gameData.blackOpener) {
+				// DOM stuff, everybody has to do this.
+				$openingRollMsg.text("It's a tie, roll again.")
+				setTimeout(function(){
+					$openingWhiteDice.attr('src', './assets/white_naked.png')
+					$openingBlackDice.attr('src', './assets/black_naked.png')
+				}, 500)
+			} else {			
+				// compare the results
+				// alter the DOM
+				if (gameData.whiteOpener > gameData.blackOpener) {
+				 	// if white goes first
+					$openingRollMsg.text(gameData.whiteName + " goes first!")
+					$openingBlackDice.attr('src', './assets/white_' + gameData.blackOpener.toString() + '.png')
+				} else {
+				 	// if black goes first
+					$openingRollMsg.text(gameData.blackName + " goes first!")
+					$openingWhiteDice.attr('src', './assets/black_' + gameData.whiteOpener.toString() + '.png')
+				}
+			}
 		}
 	}
 }
 
-///// PHASE 3 /////
+///// PHASE 3 is in gameplay.js /////
 
-// remove the modal and the wrapper
-// set up the actual game interface
-// let somebody play a turn
-// let somebody pass that info back to the database
-// because this is all based on the board, and the board doesn't let you make illegal moves,
-// the only challenge here is going to be undoing the gameflow I put together.
+///// PHASE 4 /////
+
+
+
 
 ///// Helper Functions /////
 
@@ -352,6 +407,7 @@ function resetDatabase() {
 	gameData.whiteName = ""
 	gameData.blackName = ""
 	gameData.controllerToken = 1
+	gameData.currentTurn = ""
 
 	// gameData.whiteName = "Nora"
 	// gameData.blackName = "Gus"

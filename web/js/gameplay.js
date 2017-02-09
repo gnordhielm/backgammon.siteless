@@ -1,12 +1,10 @@
-console.log('gamelogic.js connected')
-
-// Going forward, it's important to think from the perspective of the client: what information
-// does this browser need to make the game work
-
-// Thank God 'piece', 'point', 'white', and 'black' are all five letters long...
+console.log('gameplay.js connected')
 
 ///// Global Variables /////
-// Any function should feel free to alter and read these without taking them as arguments
+
+// changing these global variables should be done with care, I need to move from 
+// an objective view of the board to a subjective one, it's no longer black pieces vs white
+// it's my pieces versus theirs 
 
 var board // object which holds the state of the game
 
@@ -17,25 +15,42 @@ var thisMoves // array of possible move objects
 var white // object for player one
 var black // object for player two
 
+///// Gameplay DOM Selectors /////
 
+$setUpWrapper = $('#setup')
+$gameWrapper = $('#game')
+
+///// PHASE 3 /////
+
+function startGame() {
+	console.log("game starts.")
+	// if this is our first time through.
+	if ($openingRollModal.hasClass('active-modal')) {
+		// alter the DOM
+		$openingRollModal.removeClass('active-modal')
+		$setUpWrapper.removeClass('active-wrapper')
+		$gameWrapper.addClass('active-wrapper')
+	}
+
+	// set up the actual game interface
+	// if there is a winner, move to the next phase
+
+	// let somebody play a turn
+	// let somebody pass that info back to the database
+	// because this is all based on the board, and the board doesn't let you make illegal moves,
+	// the only challenge here is going to be undoing the gameflow I put together.
+}
 
 
 ///// Game Setup Functions /////
 
-
-
-
-
 function newGame(whiteName, blackName) {
 	white = new Player(whiteName, 'white')
 	white.dice = [new Dice(), new Dice()]
-	console.log(white.name + ' joined the game.')
 	black = new Player(blackName, 'black')
 	black.dice = [new Dice(), new Dice()]
-	console.log(black.name + ' joined the game.')
 
 	board = new BackgammonBoard()
-	console.log('Board created.')
 	var whitePieces = []
 	for (var i = 1; i <= 15; i++) {
 		whitePieces.push(new Piece(i, white))
@@ -44,8 +59,6 @@ function newGame(whiteName, blackName) {
 	for (var i = 1; i <= 15; i++) {
 		blackPieces.push(new Piece(i, black))
 	}
-	console.log('Created ' + blackPieces.length.toString() + ' black pieces and ' 
-						   + whitePieces.length.toString() + ' white pieces.')
 	board.point24 = blackPieces.splice(-2)
 	board.point19 = whitePieces.splice(-5)
 	board.point17 = whitePieces.splice(-3)
@@ -54,35 +67,33 @@ function newGame(whiteName, blackName) {
 	board.point8 = blackPieces.splice(-3)
 	board.point6 = blackPieces.splice(-5)
 	board.point1 = whitePieces.splice(-2)
-	console.log('Assigned pieces to their point arrays.')
-	console.log('--------------------------')
 }
 
 ///// Gameplay Functions /////
 
 // determines who goes first and what roll they use
-function openingRoll() {
-	white.dice[0].roll()
-	console.log(white.name + ' rolled a ' + white.dice[0].declare())
-	black.dice[0].roll()
-	console.log(black.name + ' rolled a ' + black.dice[0].declare())
-	if (white.dice[0].value === black.dice[0].value) {
-		console.log('Tie on opening roll, rolling again...')
- 		openingRoll()
- 	} else if (white.dice[0].value > black.dice[0].value) {
- 		white.dice[1].value = black.dice[0].value
-		console.log(white.name + ' goes first.')
-		console.log('--------------------------')
-		turnBuilder(white)
-	} else if (white.dice[0].value < black.dice[0].value) {
-		black.dice[1].value = white.dice[0].value
-		console.log(black.name + ' goes first.')
-		console.log('--------------------------')
-		turnBuilder(black)
-	} else {
-		console.log('!!! the openingRoll function is broken.')
-	}
-}
+// function openingRoll() {
+// 	white.dice[0].roll()
+// 	console.log(white.name + ' rolled a ' + white.dice[0].declare())
+// 	black.dice[0].roll()
+// 	console.log(black.name + ' rolled a ' + black.dice[0].declare())
+// 	if (white.dice[0].value === black.dice[0].value) {
+// 		console.log('Tie on opening roll, rolling again...')
+//  		openingRoll()
+//  	} else if (white.dice[0].value > black.dice[0].value) {
+//  		white.dice[1].value = black.dice[0].value
+// 		console.log(white.name + ' goes first.')
+// 		console.log('--------------------------')
+// 		turnBuilder(white)
+// 	} else if (white.dice[0].value < black.dice[0].value) {
+// 		black.dice[1].value = white.dice[0].value
+// 		console.log(black.name + ' goes first.')
+// 		console.log('--------------------------')
+// 		turnBuilder(black)
+// 	} else {
+// 		console.log('!!! the openingRoll function is broken.')
+// 	}
+// }
 
 // creates a new turn object and builds moves for it
 function turnBuilder(player) {

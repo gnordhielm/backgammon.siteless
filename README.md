@@ -6,17 +6,44 @@ Backgammon is one of the oldest games around - and one of the most pleasingly co
 
 Beyond the aesthetic choice - representing  the board an pieces as simply and flatly as possible - this also means leveraging the dynamic quality of a web page. Information like: pieces left on the board, possible moves, best moves, etc. can all be represented visually and impermanently.
 
-Time permitting, I also want to implement a very clean, responsive, two-machine functionality using firebase - i.e. two people on two computers can play backgammon. The best version of that has the immediate resposiveness of a game like [this](https://tictactoekate.firebaseapp.com/).
+This game is played in two browser windows by multiple human players. I tried to create a very clean, responsive functionality using firebase - evocative of a game like [this](https://tictactoekate.firebaseapp.com/).
 
 [More about backgammon](https://en.wikipedia.org/wiki/Backgammon).
 
-## Minimum Viable Product
+## Tecnologies Used
 
-My MVP is a game of backgammon two players can play on one machine. Pleasing CSS and responsiveness aside, it simply needs to take the players through a game - letting them click to make moves, and obeying the rules of the game. Pieces will change position to reflect the state of the game, and an alert will fire when a player wins the game.
+Beyond the standard web technologies - **HTML**, **CSS**, and **JavaScript** - this project also uses **jQuery** and **Firebase**.
+
+## Installation 
+
+To run this game locally, you'll need to clone the repo and run a server. I used the firebase server (`firebase serve`) in development. There is nothing secure about the backend, and you can easily mess with the database, so please don't mess with it while a game is in progress (so help me god).
+
+## Screenshots 
+
+
+
+
+## Process 
+
+My **Minimum Viable Product** was a game of backgammon two players could play on one machine. Pleasing CSS and responsiveness aside, it simply needed to take the players through a game - letting them click to make moves, and obeying the rules of the game. Pieces had to change position to reflect the state of the game, and an alert would fire when a player won the game.
+
+[Trello board](https://trello.com/b/TF5bGnYn/backgammon).
+
+<img src="./readme-images/scratchwork.jpg" style="width: 150px;">
+<img src="./readme-images/wireframes.jpg" style="width: 150px;">
+
+<img src="./readme-images/bk-piece.png" style="height: 20px;">
+<img src="./readme-images/bk-piece-home.png" style="height: 20px;">
+
+<img src="./readme-images/wh-piece.png" style="height: 20px;">
+<img src="./readme-images/wh-piece-home.png" style="height: 20px;">
+
+<img src="./readme-images/board.png" style="width: 150px;">
+<img src="./readme-images/early-browser.png" style="width: 150px;">
 
 ## To Dos
 
-These features aren't essential to the useability of the app, but I'd like to implement them at some point in the future.
+These features/fixes aren't essential to the useability of the app, but I'd like to implement them at some point in the future.
 
 * Options for spectators to join a game - at setup or while it's in progress - as spectators.
 * An 'I want to play the next game' button that lets spectators indicate that they'd like to play. The result of a click on that button would be displayed on the game-end modal.
@@ -27,24 +54,3 @@ These features aren't essential to the useability of the app, but I'd like to im
 * A 'stakes' feature which allows users to make it explicit if the game is being played to settle an argument - or debt...
 * Clicked pieces could follow the cursor around until placed.
 * A better random engine - I'll have to look into this, but I think there is something mathematically wrong with Math.random. It doesn't behave like real dice, at any rate.
-
-## Tecnologies Used
-
-Beyond the standard web technologies - **HTML**, **CSS**, and **JavaScript** - this project also uses **jQuery** and **Firebase**.
-
-## Process 
-
-* [Trello](https://trello.com/b/TF5bGnYn/backgammon)
-* [Game in progress](https://gnordhielm.github.io/backgammon/)
-
-<img src="./assets/scratchwork.jpg" style="width: 150px;">
-<img src="./assets/wireframes.jpg" style="width: 150px;">
-
-<img src="./assets/bk-piece.png" style="height: 20px;">
-<img src="./assets/bk-piece-home.png" style="height: 20px;">
-
-<img src="./assets/wh-piece.png" style="height: 20px;">
-<img src="./assets/wh-piece-home.png" style="height: 20px;">
-
-<img src="./assets/board.png" style="width: 150px;">
-
