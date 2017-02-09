@@ -271,13 +271,6 @@ function endGame(winner) {
 
 ///// Helper Functions /////
 
-function runGame() {
-	newGame('Nora', 'Gus')
-	visualizeBoard(board)
-	openingRoll()
-}
-runGame()
-
 function visualizeBoard(brd) {
 	for (var point in brd) {
 		for (var i in brd[point]) {

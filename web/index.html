@@ -7,8 +7,6 @@
 </head>
 <body>
 
-<!--********************* Intro Background *********************-->
-  <div id="setup" class="wrapper active-wrapper"></div>
 
 <!--************************* Gameplay *************************-->
   <div id="game" class="wrapper">
@@ -107,16 +105,18 @@
     </div>
   </div>
 
-<!--******************** Welcome/Setup Modal ********************-->
+<!--******************* Alternate Background *******************-->
+  <div id="setup" class="wrapper active-wrapper"></div>
 
+<!--******************** Welcome/Setup Modal ********************-->
 <div id="welcome-setup" class="modal active-modal">
   <div class="header">
     <h1>Welcome</h1>
-    <p>Enter your name to join.</p>
+    <p id="setup-msg">Enter your name to join.</p>
   </div>
 
   <div id="your-setup" class="names">
-    <img id="your-status" src="./assets/unready.png" />
+    <img id="your-status" src="./assets/unready_white.png" />
     <form id="setup-form" action="#">
         <input id="name-input" type="text" value="">
         <input type="submit" id="submit-name">
@@ -124,28 +124,31 @@
   </div>
 
   <div id="opponent-setup" class="names">
-    <img id="opponent-status" src="./assets/unready.png" />
+    <img id="opponent-status" src="./assets/unready_black.png" />
     <p id="opponent-name" class="name">Waiting for opponent...</p>
   </div>
-      <!-- <button id="join-setup">Join as a spectator.</button> -->
 </div>
 
-<!--************** Welcome/Game in Progress Modal **************-->
-<!-- 
-<div id="welcome-in-progress" class="modal">
+<!--******************** Opening Roll Modal ********************-->
+<div id="opening-roll" class="modal">
+  <div class="header">
+    <h1>Roll for First</h1>
+    <p id="roll-msg">Cast your die by clicking on it.</p>
+  </div>
 
-  <h1>Welcome</h1>
-  <p>There's a game in progress, but feel free to join as a spectator.</p>
+  <div id="white-opening-roll" class="opening">
+    <p id="white-dice-label"></p>
+    <img id="opening-white-dice" src="./assets/white_naked.png">
+  </div>
 
-    <div id="your-name"></div>
-    <div id="opponent-name"></div>
-    
-    <button id="join-in-progress">Join.</button>
+  <div id="black-opening-roll" class="opening">
+    <p id="black-dice-label"></p>
+    <img id="opening-black-dice" src="./assets/black_naked.png">
+  </div>
 
-</div> -->
+</div>
 
 <!--********************** Game-End Modal **********************-->
-
 <div id="game-end" class="modal">
 
   <h1><span id="winner-name"></span> Wins!</h1>
@@ -158,6 +161,8 @@
     <button id="leave-game">Leave game.</button>
 
 </div>
+
+<!--************************************************************-->
 
 
 

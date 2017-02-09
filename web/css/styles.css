@@ -9,8 +9,6 @@ ab9353 BRONZE/GOLD
 
 */
 
-
-
 /* Universal */
 
 body {
@@ -22,6 +20,10 @@ body {
 
 *{
 	transition: all 0.15s linear;
+}
+
+.active {
+	cursor: pointer;
 }
 
 /* Wrappers */
@@ -55,6 +57,7 @@ body {
 	position: absolute;
 	z-index: 1;
 
+	height: 255px;
 	padding: 10px;
 	text-align: center;
 
@@ -68,9 +71,15 @@ body {
     left:50%;
 }
 
+.active-modal {
+	display: block;
+}
+
 .modal .header {
 	padding-bottom: 5px;
 }
+
+
 
 .modal .names {
 	height: 50px;
@@ -83,21 +92,33 @@ body {
 
 }
 
-.modal img {
+.modal .names > img {
 	float:left;
 	width: 25px;
 	margin-right: -25px;
 }
 
 
-
-.active-modal {
-	display: block;
+.modal .opening {
+	float: left;
+	width: 150px;
+	height: 135px;
+	margin: -10px 0;
 }
 
-#welcome-setup {
+.modal .opening #white-dice-label {
+	font-size: 20px;
+	color: #ab9353;
 }
 
+.modal .opening #black-dice-label {
+	font-size: 20px;
+	color: #4d2c3d;
+}
+
+.modal .opening img {
+	width: 50px;
+}
 
 /* Game Pieces and Board */
 
@@ -125,10 +146,6 @@ body {
 
 .white-piece {
 	background-image: url(../assets/wh-piece.png);
-}
-
-.active {
-	cursor: pointer;
 }
 
 .horizontal-spacer {
