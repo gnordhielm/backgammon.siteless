@@ -1,7 +1,5 @@
 
-///// Modals /////
-
-// DOM Selectors
+///// DOM Selectors /////
 $welcomeSetUpModal = $('#welcome-setup')
 
 $setUpDiv = $('#your-setup')
@@ -26,91 +24,126 @@ $pcsBarSpan = $('#pcs-bar')
 $playAgainButton = $('#play-again')
 $leaveButton = $('#leave-game')
 
-// Names
+///// Read From the Database /////
 
-// When you submit your name, change out the form for a p tag
-// change unready to ready
+// "white", "black"
+// make sure you very explicitly think about what happens if someone shows up to your game
+// while it's in progress. Happily, anyone who hasn't submitted a form doesn't have a myColor.
+// Take advantage of that.
+var myColor
+var theirColor
 
-
-// $(document).ready(function() {
-//     console.log("DOM loaded.")
-// 	// Array which holds all firebase data
-// 	var firebaseData = [] 
-// 	// Connect to Firebase
-// 	// Keep firebaseData updated
-// 	databaseRef.on("value", function(snapshot) {
-// 		console.log(snapshot.val())
-// 		$opponentName.text(snapshot.val()) 
-// 	})
-
-// 	// Send info to firebase on form submit
-//   	$setUpForm.submit(function(event){
-// 	    var $form = $(this)
-// 	    console.log("submit to Firebase")
-// 	    // Disable the normal submit behaviors
-// 	    // $submitNameButton.prop('disabled', true)
-// 	    // Extract the name from the input, in order to send to Firebase
-// 	    var nameToSend = $nameInput.val();
-// 	    console.log(nameToSend);
-// 	    // Format it like a JSON object
-// 	    firebaseData.playerTwoName = nameToSend
-// 	    // Send the new firebaseData to Firebase
-// 		databaseRef.set(firebaseData);
-// 	    console.log(firebaseData);
-
-// 	    return false;
-//   	})
-// })
+var gameData
+// This is where firebase data will be stored
+//		controllerToken - int
+// 		blackName - str
+//		whiteName - str
 
 // Connect to the whole database with a "reference"
 var databaseRef = firebase.database().ref().child('gameData')
 
-databaseRef.on("value", dataChangeSuite)
+// Set an event listener to fire every time the data changes
+databaseRef.on("value", dataChangeController)
 
-function dataChangeSuite(snapshot) {
-	// This is where firebase data will be stored
-	// gameData is an object
-	// 		blackName - str
-	//		whiteName - str
-	//		tester - str
+function dataChangeController(snapshot) {
+	// Update gameData
 	gameData = snapshot.val()
-
-	// set opponent if opponent exists already
-	if (gameData.whiteName) {
-		$opponentName.text(gameData.whiteName)
-		$opponentStatusImg.prop('src', './assets/ready.png') 	
+	
+	switch (gameData.controllerToken) {
+		case 1:
+			setUpGame()
+			break
+		case 2:
+			// opening roll
+			break
+		case 3:
+			// turn exchanges
+			break
+		case 4:
+			// end of the game
+			break
 	}
-
-	// set you if the data is available
-	if (gameData.blackName) {
-		$setUpForm.remove()
-		$setUpDiv.append('<p id="your-name" class="name">' + gameData.blackName + '</p>')
-		$yourStatusImg.prop('src', './assets/ready.png') 	
-	}
-
 }
+
+function setUpGame() {
+	// no players in the database
+	if (gameData.whiteName === "" && gameData.blackName === "") {
+		// the player will commit their name to whiteName
+
+		$setUpForm.on('submit', function(event) {
+			// I have joined the game, set my color
+			myColor = "white"
+			theirColor = "black"
+		    // Disable the button
+		    $submitNameButton.prop('disabled', true)
+		    // Update the gameData
+		    gameData.whiteName = $nameInput.val()
+		    // Send the whole object back to the database
+		    databaseRef.set(gameData)
+		    // Stop the page from reloading
+		    return false
+		})
+	// one player in the database
+	} else if (gameData.blackName === "") {
+		// update the DOM, depending on which player is coming through here
+		if (myColor === "white") {
+			$setUpForm.remove()
+			$setUpDiv.append('<p id="your-name" class="name">' + gameData.whiteName + '</p>')
+			$yourStatusImg.prop('src', './assets/ready.png') 
+		} else {
+			// the player will commit their name to blackName
+			$opponentName.text(gameData.whiteName)
+			$opponentStatusImg.prop('src', './assets/ready.png') 
+
+			$setUpForm.on('submit', function(event) {
+				// I have joined the game, set my color
+				myColor = "black"
+				theirColor = "white"
+			    // Disable the button
+			    $submitNameButton.prop('disabled', true)
+			    // Update the gameData
+			    gameData.blackName = $nameInput.val()
+			    // Send the whole object back to the database
+			    databaseRef.set(gameData)
+			    // Stop the page from reloading
+			    return false
+			})
+		}
+	// both players in the database
+	} else {
+		// if this is one of the players, just update their display in the appropriate way
+		if (myColor === "white") {
+			// set black to ready
+			$opponentName.text(gameData.blackName)
+			$opponentStatusImg.prop('src', './assets/ready.png') 
+		} else {
+			// remove the form, set to ready
+			$setUpForm.remove()
+			$setUpDiv.append('<p id="your-name" class="name">' + gameData.blackName + '</p>')
+			$yourStatusImg.prop('src', './assets/ready.png') 
+		} 
+
+		// in several seconds, start the game
+		function startGame() {
+			console.log('and so the game begins!')
+		}
+		setTimeout(startGame, 2000)
+	}
+}
+
+
+
 
 ///// Alter the Database /////
 
-$setUpForm.on('submit', function(event) {
-    // Disable the button
-    $submitNameButton.prop('disabled', true)
-    // Update the gameData
-    gameData.blackName = $nameInput.val()
-    // Send the whole object back to the database
-    databaseRef.set(gameData)
-    console.log($nameInput.val())
-    // Stop the page from reloading
-    return false
-	
-})
+// reset a set of explicitly declared values in the database
+function resetDatabase() {
+	gameData.whiteName = ""
+	gameData.blackName = ""
+	gameData.controllerToken = 1
+
+	databaseRef.set(gameData)
+}
 
 
-// undo button
-// commit button
-// dice interface
-// forfeit button
-
-
-// end interface, play again or close up shop
 
