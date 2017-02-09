@@ -69,7 +69,6 @@ function setUpGame() {
 	// no players in the database
 	if (gameData.whiteName === "" && gameData.blackName === "") {
 		// the player will commit their name to whiteName
-
 		$setUpForm.on('submit', function(event) {
 			// I have joined the game, set my color
 			myColor = "white"
@@ -94,7 +93,9 @@ function setUpGame() {
 			// the player will commit their name to blackName
 			$opponentName.text(gameData.whiteName)
 			$opponentStatusImg.prop('src', './assets/ready.png') 
-
+			// take off the listener that commits to white name
+			$setUpForm.off()
+			// add the listener that commits to black name
 			$setUpForm.on('submit', function(event) {
 				// I have joined the game, set my color
 				myColor = "black"
@@ -116,13 +117,23 @@ function setUpGame() {
 			// set black to ready
 			$opponentName.text(gameData.blackName)
 			$opponentStatusImg.prop('src', './assets/ready.png') 
-		} else {
+		} else if (myColor === "black"){
 			// remove the form, set to ready
 			$setUpForm.remove()
 			$setUpDiv.append('<p id="your-name" class="name">' + gameData.blackName + '</p>')
 			$yourStatusImg.prop('src', './assets/ready.png') 
-		} 
 
+		// for spectators
+		} else {
+			// make sure no spectators can alter the database
+			$setUpForm.off() 
+			// render the whole damn thing
+			$setUpForm.remove()
+			$setUpDiv.append('<p id="your-name" class="name">' + gameData.whiteName + '</p>')
+			$yourStatusImg.prop('src', './assets/ready.png') 
+			$opponentName.text(gameData.blackName)
+			$opponentStatusImg.prop('src', './assets/ready.png') 
+		}
 		// in several seconds, start the game
 		function startGame() {
 			console.log('and so the game begins!')
