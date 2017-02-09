@@ -60,6 +60,9 @@ function dataChangeController(snapshot) {
 	gameData = snapshot.val()
 	
 	switch (gameData.controllerToken) {
+		case 0:
+			testing()
+			break
 		case 1:
 			setUpGame()
 			break
@@ -402,11 +405,15 @@ function openingDiceAnimate(color) {
 	}, 100)
 }
 
+function testing() {
+	console.log('testing')
+}
+
 // reset a set of explicitly declared values in the database
 function resetDatabase() {
 	gameData.whiteName = ""
 	gameData.blackName = ""
-	gameData.controllerToken = 1
+	gameData.controllerToken = 0
 	gameData.currentTurn = ""
 
 	// gameData.whiteName = "Nora"
