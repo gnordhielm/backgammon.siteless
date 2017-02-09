@@ -111,7 +111,7 @@ body {
 
 .modal .opening #white-dice-label {
 	font-size: 20px;
-	color: #ab9353;
+	color: c;
 }
 
 .modal .opening #black-dice-label {
@@ -125,53 +125,97 @@ body {
 
 /* Game Pieces and Board */
 
-#board {
-	z-index: 0;
+#board-holder {
+	margin: 70px auto 0;
+	width: 720px;
+}
+
+#board-holder > h1 {
+	font-family: sans-serif;
+	text-align: center;
+	font-size: 50px;
+	padding: 10px;
+	color: #155765;
+}
+
+#dashboards {
+	z-index: 1;
 	position: relative;
-	background-image: url(../assets/board.png);
-	background-size: cover;
-	height: 405px;
-    width: 536px;
-    padding: 10px;
+	left: 620px;
+	top: -310px;
+
+	font-family: sans-serif;
+}
+
+#white-dashboard-name{
+	color: #ab9353;
+}
+
+#black-dashboard-name{
+	color: #4d2c3d;
+}
+
+#dice img {
+	width:30px;
+}
+
+svg#board {
+	z-index: 0;
+	height: 450px;
+}
+
+.toolbar-button{
+	fill:#155765;
+}
+
+.toolbar-line,.commit-icon{
+	fill:none;
+	stroke-miterlimit:10;
+}
+
+.toolbar-line{
+	stroke:#155765;
+	stroke-width:7px;
+}
+
+.undo-icon{
+	fill:#eae3ea;
+}
+
+.commit-icon{
+	stroke:#eae3ea;
+	stroke-width:6.9px;
+}
+
+.point {
+
+}
+
+.white-point {
+	fill:#ab9353;
+}
+
+.black-point {
+	fill:#4d2c3d;
+}
+
+.decoration {
+	fill:#155765;
 }
 
 .piece {
-	z-index: 2;
-	width: 35px;
-	height: 35px;
-	position: absolute;
-	background-size: cover;
-}
-
-.black-piece {
-	background-image: url(../assets/bk-piece.png);
 }
 
 .white-piece {
-	background-image: url(../assets/wh-piece.png);
+	fill:#ab9353;
+	stroke:#eae3ea;
+	stroke-miterlimit:10;
+	stroke-width:5.93px;
 }
 
-.horizontal-spacer {
-	width: 7px;
-	height: 155px;
-	float: left;
-	opacity: 0.5;
-}
-
-.vertical-spacer{
-	width: 100%;
-	height: 14px;
-	clear: both;
-	opacity: 0.5;
-}
-.point {
-	height: 200px;
-	width: 37px;
-	float: left;
-}
-
-.home {
-	height: 200px;
-	width: 43px;
-	float: left;
+.black-piece {
+	fill:#4d2c3d;
+	stroke:#eae3ea;
+	stroke-miterlimit:10;
+	stroke-width:5.93px;
 }
