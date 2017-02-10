@@ -12,14 +12,11 @@ This game is played in two browser windows by multiple human players. I tried to
 
 ## Technologies Used
 
-Beyond the standard web technologies - **HTML**, **CSS**, and **JavaScript** - this project also uses **jQuery** and **Firebase**.
-
-### DEMO
-[Firebase console](https://console.firebase.google.com/project/backgammon-b0760/database/data/gameData)
+Beyond the standard web technologies - **HTML**, **CSS**, and **JavaScript** - this project also uses **jQuery** and Google's **Firebase** database alternative.
 
 ## Installation 
 
-To run this game locally, you'll need to clone the repo and run a server. I used the firebase server (`firebase serve`) in development. There is nothing secure about the backend, and you can easily mess with the database, so please don't mess with it while a game is in progress (so help me god).
+To run this game locally, you'll need to clone the repo and run a server. If you are not able to connect to my database, you'll need to create your own and link it up. Running `resetDatabase()` from the command line should be enough to set it up initially, after that the game can handle it. That's the function to run if you get into trouble and need to dump the database.
 
 ## Process 
 

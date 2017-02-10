@@ -386,11 +386,10 @@ function updateClickable(arr, timesThrough) {
 						console.log('!!! the function that is supposed to figure out\
 									if things are pieces or points was just fed neither.')
 				}
-			updateClickable(thisMoves, 2)
+				updateClickable(thisMoves, 2)
 
-			// in cases where, after the first winnow, only one move remains, play it.
-			// as long as we are not in the home stretch.
-			if (thisMoves.length === 1 && !thisTurn.player.homeStretch) endMove()
+				// in cases where, after the first winnow, only one move remains, play it.
+				if (thisMoves.length === 1 ) endMove()
 
 			// second time through
 			} else if (timesThrough === 2) {
@@ -406,7 +405,7 @@ function updateClickable(arr, timesThrough) {
 						console.log('!!! the function that is supposed complete a move with\
 									 either a piece or a point was just fed neither.')
 				}
-			endMove()
+				endMove()
 			}
 			
 		})	
@@ -416,7 +415,7 @@ function updateClickable(arr, timesThrough) {
 
 // takes a type (point/piece) as a string and the particular value as a string
 // used by updateClickable to narrow thisMoves down to only moves with that value
-function winnowMoves(type, id, pass) {
+function winnowMoves(type, id) {
 	var result = []
 	// loop through thisMoves, cut away everything of the type which doesn't include the id
 	switch(type) {
@@ -512,10 +511,6 @@ function DOMtoPosition(id, brd) {
 // checks to see if a spot on the given board is occupied by the
 // other player, and so cannot be moved to
 function isOccupied(point, brd, thisPlayer) {
-console.log('Arguments passed to isOccupied:')
-console.log(point)
-console.log(brd)
-console.log(thisPlayer)
 	// if this gets passed overshoot, just return false - overshoots are handled by projectMove
 	if (point === 'overshoot') return false
 	if (brd[point].length > 1) {
