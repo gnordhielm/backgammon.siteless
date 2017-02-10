@@ -10,18 +10,13 @@ This game is played in two browser windows by multiple human players. I tried to
 
 [More about backgammon](https://en.wikipedia.org/wiki/Backgammon).
 
-## Tecnologies Used
+## Technologies Used
 
 Beyond the standard web technologies - **HTML**, **CSS**, and **JavaScript** - this project also uses **jQuery** and **Firebase**.
 
 ## Installation 
 
 To run this game locally, you'll need to clone the repo and run a server. I used the firebase server (`firebase serve`) in development. There is nothing secure about the backend, and you can easily mess with the database, so please don't mess with it while a game is in progress (so help me god).
-
-## Screenshots 
-
-
-
 
 ## Process 
 
@@ -40,13 +35,6 @@ My **Minimum Viable Product** was a game of backgammon two players could play on
 
 <img src="./readme-images/board.png" style="width: 150px;">
 <img src="./readme-images/early-browser.png" style="width: 150px;">
-
-## Unsolved Problems
-
-Little bugs I should fix, but haven't yet.
-
-* Tie on opening roll advances to game board. I have tried to recreate the problem by manipulating the database directly and seeing what the browsers do, but it only happens when the browsers trigger the tie themselves.
-* There is a bug where from the perspective of whites, their die changes to the other color when they win the roll.
 
 ## To Dos
 

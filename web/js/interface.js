@@ -20,14 +20,13 @@ $openingWhiteDice = $('#opening-white-dice')
 $blackDiceLabel = $('#black-dice-label')
 $openingBlackDice = $('#opening-black-dice')
 
-
-
 $gameEndModal = $('#game-end')
 $winnerNameSpan = $('#winner-name')
 $loserNameSpan = $('#loser-name')
 $pcsHomeSpan = $('#pcs-home')
 $pcsBarSpan = $('#pcs-bar')
 
+$buttonHolder = $('#button-holder')
 $playAgainButton = $('#play-again')
 // go back to opening roll
 $leaveButton = $('#leave-game')
@@ -66,7 +65,7 @@ function dataChangeController(snapshot) {
 	
 	switch (gameData.controllerToken) {
 		case 0:
-			testing()
+			// testing()
 			break
 		case 1:
 			setUpGame()
@@ -78,7 +77,10 @@ function dataChangeController(snapshot) {
 			firstMove()
 			break
 		case 4:
-			// end of the game
+			regularGameplay()
+			break
+		case 5:
+			endGame()
 			break
 	}
 }
@@ -383,11 +385,80 @@ function openingRoll() {
 	}
 }
 
-///// PHASE 3 is in gameplay.js /////
+///// PHASE 3 and 4 are in gameplay.js /////
 
-///// PHASE 4 /////
+///// PHASE 5 /////
 
+function endGame() {
+	console.log('there is a winner!')
+	if (gameData.currentTurn !== myColor) {
+		//unpack data
+		board = unfirebasify(gameData.turnData)
+		// render the board
+		renderBoard(board)
+	}
+	// bring up the win modal for everybody
+	setTimeout(function(){
+		$gameWrapper.removeClass('active-wrapper')
+		
+		$gameEndModal.addClass('active-modal')
+		$setUpWrapper.addClass('active-wrapper')
+		if (gameData.winner === 'white') {
+			$winnerNameSpan.text(gameData.whiteName)
+			$loserNameSpan.text(gameData.blackName)
+			$pcsHomeSpan.text(gameData.blackPiecesHome)
+			$pcsBarSpan.text(gameData.barAtEnd)
 
+		} else {
+			$winnerNameSpan.text(gameData.blackName)
+			$loserNameSpan.text(gameData.whiteName)
+			$pcsHomeSpan.text(gameData.whitePiecesHome)
+			$pcsBarSpan.text(gameData.barAtEnd)
+		}
+
+	}, 1500)
+	// If I was a player, I get the option to play again or not.
+	if (!!myColor) {
+		$buttonHolder.append('<button id="play-again">Again</button>')
+		$buttonHolder.append('<button id="leave-game">Quit</button>')
+		$playAgainButton.off()
+		$playAgainButton.addClass('active')
+		$playAgainButton.on('click', function(e){
+			$playAgainButton.off()
+			$playAgainButton.removeClass('active')
+			gameData.controllerToken = 2
+			gameData.currentTurn = null
+			gameData.currentRoll0 = null
+			gameData.currentRoll1 = null
+			gameData.whiteOpener = null
+			gameData.blackOpener = null
+			gameData.turnData = null
+			gameData.whitePiecesHome = null
+			gameData.blackPiecesHome = null
+
+			databaseRef.set(gameData)
+		})
+		$leaveButton.off()
+		$leaveButton.addClass('active')
+		$leaveButton.on('click', function(e){
+			$leaveButton.off()
+			$leaveButton.removeClass('active')
+			gameData.whiteName = ""
+			gameData.blackName = ""
+			gameData.controllerToken = 1
+			gameData.currentTurn = null
+			gameData.currentRoll0 = null
+			gameData.currentRoll1 = null
+			gameData.whiteOpener = null
+			gameData.blackOpener = null
+			gameData.turnData = null
+			gameData.whitePiecesHome = null
+			gameData.blackPiecesHome = null
+
+			databaseRef.set(gameData)
+		})
+	}
+}
 
 
 ///// Helper Functions /////
@@ -420,30 +491,35 @@ function testing() {
 
 // reset a set of explicitly declared values in the database
 function resetDatabase() {
-	// gameData.whiteName = ""
-	// gameData.blackName = ""
-	// gameData.controllerToken = 1
-	// gameData.currentTurn = null
-	// gameData.whiteOpener = null
-	// gameData.blackOpener = null
+	gameData.whiteName = ""
+	gameData.blackName = ""
+	gameData.controllerToken = 1
+	gameData.currentTurn = null
+	gameData.currentRoll0 = null
+	gameData.currentRoll1 = null
+	gameData.whiteOpener = null
+	gameData.blackOpener = null
+	gameData.turnData = null
+	gameData.whitePiecesHome = null
+	gameData.blackPiecesHome = null
 
-	myColor = 'white'
-	myName = 'David'
+	// myColor = 'white'
+	// myName = 'David'
 
-	theirColor = 'black'
-	theirName = 'Goliath'
+	// theirColor = 'black'
+	// theirName = 'Goliath'
 
-	gameData.whiteName = "David"
-	gameData.blackName = "Goliath"
-	gameData.controllerToken = 3
-	gameData.currentTurn = 'white'
-	gameData.whiteOpener = 6
-	gameData.blackOpener = 2
+	// gameData.whiteName = "David"
+	// gameData.blackName = "Goliath"
+	// gameData.controllerToken = 3
+	// gameData.currentTurn = 'white'
+	// gameData.whiteOpener = 6
+	// gameData.blackOpener = 2
 
-		$welcomeSetUpModal.removeClass('active-modal')
-			$openingRollModal.removeClass('active-modal')
-		$setUpWrapper.removeClass('active-wrapper')
-			$gameWrapper.addClass('active-wrapper')
+	// 	$welcomeSetUpModal.removeClass('active-modal')
+	// 		$openingRollModal.removeClass('active-modal')
+	// 	$setUpWrapper.removeClass('active-wrapper')
+	// 		$gameWrapper.addClass('active-wrapper')
 
 	databaseRef.set(gameData)
 }

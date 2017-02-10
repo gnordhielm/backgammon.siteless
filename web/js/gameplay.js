@@ -16,11 +16,15 @@ var me // stores the object of my player
 $setUpWrapper = $('#setup')
 $gameWrapper = $('#game')
 
-$whitePlayerName = $('#white-dashboard-name')
-$blackPlayerName = $('#black-dashboard-name')
+$whitePlayerName = $('#whiteHome')
+$blackPlayerName = $('#blackHome')
 
+$diceHolder = $('#dice')
 $dice0 = $('#dice-0')
 $dice1 = $('#dice-1')
+
+$undoButton = $('#undo-button')
+$commitButton = $('#commit-button')
 
 // $undoButton = $
 // $commitButton = $
@@ -36,7 +40,6 @@ function firstMove() {
 			}
 	// if it's my turn
 	if (gameData.currentTurn === myColor) {
-
 		// create the player objects
 		me = new Player(myName, myColor)
 		them = new Player(theirName, theirColor)
@@ -45,9 +48,7 @@ function firstMove() {
 		me.dice = [new Dice(), new Dice()]
 		// assign values to my dice
 		me.dice[0].value = gameData.whiteOpener
-		console.log(me.dice[0].value)
 		me.dice[1].value = gameData.blackOpener
-		console.log(me.dice[1].value)
 		// create a new board
 		newBoard(me, them)
 		// render that board
@@ -60,15 +61,40 @@ function firstMove() {
 		$blackPlayerName.text(gameData.blackName)
 		// let me play:
 		// make my pieces clickable
-		turnBuilder(me)
 		// make movable points clickable
+		turnBuilder(me)
 		// make the undo and commit buttons live
-		// render my moves
-		// when I click 'commit'
-			// firebaseify the board object
+		$undoButton.off()
+		$undoButton.addClass('active')
+		$undoButton.on('click', function(e) {
+			// if there are moves to undo, undo them
+			if (thisTurn.moves.length > 0) {
+				thisTurn.undo()
+				moveBuilder()
+			} else {
+				alert('There are no moves to undo, and I think you knew that, so what the hell?')
+			}
+		})
+		$commitButton.off()
+		$commitButton.addClass('active')
+		$commitButton.on('click', function(e) {
+			// turn off all my event listeners
+			$undoButton.off()
+			$commitButton.off()
+			// change the dice
+			$dice0.attr('src', './assets/' + them.color + '_naked.png')
+			$dice1.attr('src', './assets/' + them.color + '_naked.png')
+			// commit the preview to the board
+			thisTurn.commitToBoard()
+			// firebasify the board object and set it to gameData.board
+			gameData.turnData = firebasify(board)
 			// set the controller token to 4
-			// set it to gameData.board
+			gameData.controllerToken = 4
+			// set the current turn to the other player
+			gameData.currentTurn = them.color
 			// commit the change
+			databaseRef.set(gameData)
+		})
 			// we will not come through here again!
 
 	// if it's not my turn, and I am a player
@@ -81,6 +107,8 @@ function firstMove() {
 		me.dice = [new Dice(), new Dice()]
 		// create a new board
 		newBoard(me, them)
+		// create the preview board
+		preview = jQuery.extend(true, {}, board)
 		// render that board
 		renderBoard(board)
 		// render the current player's dice
@@ -106,6 +134,8 @@ function firstMove() {
 		them.dice = [new Dice(), new Dice()]
 		// create a new board
 		newBoard(me, them)
+		// create the preview board
+		preview = jQuery.extend(true, {}, board)
 		// render that board
 		renderBoard(board)
 		// render the current player's dice
@@ -114,18 +144,115 @@ function firstMove() {
 		// render player names
 		$whitePlayerName.text(gameData.whiteName)
 		$blackPlayerName.text(gameData.blackName)
-
 	}
 }
 
-	// set up the actual game interface
-	// if there is a winner, move to the next phase
+///// PHASE 4 /////
 
-	// let somebody play a turn
-	// let somebody pass that info back to the database
-	// because this is all based on the board, and the board doesn't let you make illegal moves,
-	// the only challenge here is going to be undoing the gameflow I put together.
-
+function regularGameplay() {
+	// if it's my turn
+	if (gameData.currentTurn === myColor) {
+		// if I have not rolled
+		if (!gameData.currentRoll0) {
+			//unpack data
+			board = unfirebasify(gameData.turnData)
+			// render the board
+			renderBoard(board)
+			// reset the dice
+			$dice0.attr('src', './assets/' + gameData.currentTurn + '_naked.png')
+			$dice1.attr('src', './assets/' + gameData.currentTurn + '_naked.png')
+			// let me roll
+			$diceHolder.off()
+			$diceHolder.addClass('active')
+			$diceHolder.on('click', function(e){
+				$diceHolder.off()
+				$diceHolder.removeClass('active')
+				me.dice[0].roll()
+				me.dice[1].roll()
+				gameData.currentRoll0 = me.dice[0].value
+				gameData.currentRoll1 = me.dice[1].value
+				// commit the changes
+				databaseRef.set(gameData)
+			})
+		// if I have rolled
+		} else {
+			$dice0.attr('src', './assets/' + gameData.currentTurn + '_' + gameData.currentRoll0 + '.png')
+			$dice1.attr('src', './assets/' + gameData.currentTurn + '_' + gameData.currentRoll1 + '.png')
+			// make my pieces clickable
+			// make movable points clickable
+			turnBuilder(me)
+			// make the undo and commit buttons live
+			$undoButton.off()
+			$undoButton.addClass('active')
+			$undoButton.on('click', function(e) {
+				// if there are moves to undo, undo them
+				if (thisTurn.moves.length > 0) {
+					thisTurn.undo()
+					moveBuilder()
+				} else {
+					alert('There are no moves to undo, and I think you knew that, so what the hell?')
+				}
+			})
+			$commitButton.off()
+			$commitButton.addClass('active')
+			$commitButton.on('click', function(e) {
+				// turn off all my event listeners
+				$undoButton.off()
+				$commitButton.off()
+				// change the dice
+				$dice0.attr('src', './assets/' + them.color + '_naked.png')
+				$dice1.attr('src', './assets/' + them.color + '_naked.png')
+				// commit the preview to the board
+				thisTurn.commitToBoard()
+				// firebasify the board object and set it to gameData.board
+				gameData.turnData = firebasify(board)
+				// clear out the current roll
+				gameData.currentRoll0 = null
+				gameData.currentRoll1 = null
+				// set the current turn to the other player
+				gameData.currentTurn = them.color
+				// commit the changes
+				databaseRef.set(gameData)
+			})
+		}
+	// if it's not my turn, but I am a player
+	} else if (!!myColor) { 
+		// render the current player's dice, if it's possible
+		if (!!gameData.currentRoll0) {
+			$dice0.attr('src', './assets/' + gameData.currentTurn + '_' + gameData.currentRoll0 + '.png')
+			$dice1.attr('src', './assets/' + gameData.currentTurn + '_' + gameData.currentRoll1 + '.png')
+		}
+	// if I'm not a player
+	} else {
+		// ensure old modals are gone
+		$welcomeSetUpModal.removeClass('active-modal')
+		$openingRollModal.removeClass('active-modal')
+		$setUpWrapper.removeClass('active-wrapper')
+		$gameWrapper.addClass('active-wrapper')
+		// create the player objects
+		me = new Player(gameData.whiteName, "white")
+		them = new Player(gameData.blackName, "black")
+		// create dice for the player objects
+		me.dice = [new Dice(), new Dice()]
+		them.dice = [new Dice(), new Dice()]
+		// create a new board
+		newBoard(me, them)
+		// create the preview board
+		preview = jQuery.extend(true, {}, board)
+		// read the latest game data
+		board = unfirebasify(gameData.turnData)
+		// render the board
+		renderBoard(board)
+		// render the current player's dice, if it's possible
+		// render player names
+		$whitePlayerName.text(gameData.whiteName)
+		$blackPlayerName.text(gameData.blackName)
+		if (!!gameData.currentRoll0) {
+			$dice0.attr('src', './assets/' + gameData.currentTurn + '_' + gameData.currentRoll0 + '.png')
+			$dice1.attr('src', './assets/' + gameData.currentTurn + '_' + gameData.currentRoll1 + '.png')
+		}
+	}
+}
 
 ///// Game Setup Functions /////
 
@@ -172,49 +299,39 @@ function turnBuilder(player) {
 }
 
 function moveBuilder() {
-
 	// reflect the last move in the state of the player
 	thisTurn.player.updateState()
-	// end game from here if someone has won
-	if (thisTurn.player.hasWon) endGame(thisTurn.player)
+	// end the game from here if someone has won
+	if (thisTurn.player.hasWon) {
+		gameData.winner = thisTurn.player.color
+		gameData.turnBuilder = firebasify(board)
+		gameData.whitePiecesHome = board.point25.length
+		gameData.blackPiecesHome = board.point0.length
+		gameDada.barAtEnd = board.bar.length
+		gameData.controllerToken = 5
+		databaseRef.set(gameData)
+	}
 	// set up for next move, given the the previous moves
 	thisMoves = thisTurn.possibleMoves()
 
 	// no more resources, no more possible moves
 	if (thisMoves.length === 0) {
 		
-		// the player hasn't been able to do anything this turn, acknowledge that, next turn
+		// the player hasn't been able to do anything this turn, acknowledge that
 		if (thisTurn.moves.length === 0) {
-			console.log('Sorry, ' + thisTurn.player.name + ' there are no possible moves for you.')
-			endTurn()
-		
-		// the player has exhausted all possible moves, provide commit option
+			alert('Sorry, ' + thisTurn.player.name + ' there are no possible moves for you.')
 		} else {
 
 			// the player has not used all of their dice
 			if (thisTurn.availableResources.length !== 0) {
-				// display commit button
-				console.log('No more possible moves. Feel free to undo and try other moves.')
-				
-				// while the commit button is clicked
-					// remove the commit button
-					endTurn()
-				
-			// the player has used all of their dice, provide commit option	
+				alert('No more possible moves. Feel free to undo and try other moves.')
 			} else {
-				// display commit button
 				console.log("You've used all of your dice!")
-				
-				// while the commit button is clicked
-					// remove the commit button
-					endTurn()
 			}
 		}
-
 	// go ahead with making a new move
 	} else {
 		updateClickable(thisMoves, 1)
-
 	}
 }
 
@@ -302,7 +419,6 @@ function winnowMoves(type, id) {
 
 // handles the transition into the next move
 function endMove() {
-
 	// make sure nothing is clickable
 	updateClickable([], 3)
 	// push this move to the turn
@@ -311,39 +427,54 @@ function endMove() {
 	thisTurn.updatePreview()
 	// visualize the preview board
 	renderBoard(preview)
-	// start a new move
+	// call moveBuilder to see if we start a new move
 	moveBuilder()
 }
 
-
-// handles the transition into the next player's turn
-function endTurn() {
-	// commit my moves
-	thisTurn.commitToBoard()
-
-	// roll the other player's dice
-	them.dice[0].roll()
-	them.dice[1].roll()
-}
-
-///// Game End Functions /////
-
-function endGame(winner) {
-
-	// commit the most recent player's moves
-	thisTurn.commitToBoard()
-
-	// by the bar and the number of pieces in the other player's home
-	// if it was a win, gammon, or backgammon
-	alert(winner.name + " wins the whole damn game!")
-}
-
-//reset the board
-//	reset global variables
-//  save the names
-//  
-
 ///// Helper Functions /////
+
+function firebasify(brd) {
+	// for every point in the board, get an array of piece declarations
+	var result = {
+			bar: [], point0: [], point25: [],
+			point1: [], point2: [], point3: [], point4: [], point5: [], point6: [],
+			point7: [], point8: [], point9: [], point10: [], point11: [], point12: [],
+			point13: [], point14: [], point15: [], point16: [], point17: [], point18: [],
+			point19: [], point20: [], point21: [], point22: [], point23: [], point24: []
+	}
+	for (var point in board) {
+		for (var i in board[point]) {
+			result[point].push(board[point][i].declare())
+		}
+	}
+	return result
+}
+
+function unfirebasify(data) {
+	// create firebase preview
+	var firebasePreview = {
+			bar: [], point0: [], point25: [],
+			point1: [], point2: [], point3: [], point4: [], point5: [], point6: [],
+			point7: [], point8: [], point9: [], point10: [], point11: [], point12: [],
+			point13: [], point14: [], point15: [], point16: [], point17: [], point18: [],
+			point19: [], point20: [], point21: [], point22: [], point23: [], point24: []
+	}
+	// loop through and get strings in the right places
+	for (var point in data) {
+		for (var i in data[point]) {
+			firebasePreview[point].push(data[point][i])
+		}
+	}
+	// turn the strings into piece objects
+	for (var point in firebasePreview) {
+		for (var i in firebasePreview[point]) {
+			firebasePreview[point][i] = DOMtoPiece(firebasePreview[point][i])
+		}
+	}
+	me.updateState()
+	them.updateState()
+	return firebasePreview
+}
 
 function DOMtoPiece(id) {
 	for (var point in board) {
@@ -364,7 +495,7 @@ function DOMtoPosition(id, brd) {
 // checks to see if a spot on the given board is occupied by the
 // other player, and so cannot be moved to
 function isOccupied(point, brd, thisPlayer) {
-	// if this gets passed overshoot, just return false
+	// if this gets passed overshoot, just return false - overshoots are handled by projectMove
 	if (point === 'overshoot') return false
 	if (brd[point].length > 1) {
 		if (brd[point][0].player === thisPlayer) {
@@ -525,19 +656,19 @@ function gridLookup(point, position, axis) {
 			if (parseInt(position) >= 4) {
 				return 452.02
 			} else {
-				top = {0: 340.51, 1: 368.39, 2: 396.27, 3: 424.14}
+				top = {0: 368.39, 1: 340.51, 2: 396.27, 3: 424.14}
 			}
-		} else if (point.toString() === 'point0') {
+		} else if (point.toString() === 'point25') {
 			top = {0: 17.19, 1: 37.78, 2: 58.37, 3: 78.96, 4: 99.55, 
 					5: 120.14, 6: 140.73, 7: 161.32, 8: 181.91, 9: 202.5, 
 					10: 223.09, 11: 243.68, 12: 264.27, 13: 284.86, 14: 305.45}
-		} else if (point.toString() === 'point25') {
+		} else if (point.toString() === 'point0') {
 			top = {0: 784.43, 1: 763.84, 2: 743.25, 3: 722.66, 4: 702.07, 
 					5: 681.48, 6: 660.89, 7: 640.3, 8: 619.71, 9: 599.12, 
 					10: 578.53, 11: 557.94, 12: 537.35, 13: 516.76, 14: 496.17}
 		} else if (parseInt(point.toString().slice(5)) <= 12){
 			if (parseInt(position) >= 5) {
-				return 452.02
+				return 481.45 
 			} else {
 				top = {0: 760.23, 1: 704.47, 2: 648.71, 3: 592.96, 4: 537.2}
 			}

@@ -115,7 +115,7 @@ h1 {
 
 .modal .opening #white-dice-label {
 	font-size: 20px;
-	color: c;
+	color: #ab9353;
 }
 
 .modal .opening #black-dice-label {
@@ -127,6 +127,16 @@ h1 {
 	width: 50px;
 }
 
+
+#button-holder {
+	width: 170px;
+	margin:0 auto;
+	text-align: center;
+}
+
+#button-holder button{
+	display: inline;
+}
 /* Game Pieces and Board */
 
 #board-holder {
@@ -156,11 +166,11 @@ h1 {
 	padding-left: 15px;
 }
 
-#white-dashboard-name{
+.white-dashboard-name{
 	color: #ab9353;
 }
 
-#black-dashboard-name{
+.black-dashboard-name{
 	color: #4d2c3d;
 }
 
@@ -172,6 +182,7 @@ svg#board {
 	z-index: 0;
 	height: 450px;
 }
+
 
 .toolbar-button{
 	fill:#155765;
@@ -191,9 +202,20 @@ svg#board {
 	fill:#eae3ea;
 }
 
+.undo-button.active:hover + .undo-icon {
+	fill:#155765;
+	transform:translateX(-40px);
+}
+
 .commit-icon{
 	stroke:#eae3ea;
 	stroke-width:6.9px;
+}
+
+.commit-button.active:hover + .commit-icon{
+	transform:translateX(-40px);
+	stroke:#155765;
+
 }
 
 .point {
@@ -212,7 +234,8 @@ svg#board {
 	fill:#155765;
 }
 
-.piece {
+.piece.active:hover {
+	stroke:#155765;
 }
 
 .white-piece {
