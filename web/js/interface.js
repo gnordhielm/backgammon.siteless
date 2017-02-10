@@ -401,13 +401,13 @@ function endGame() {
 		if (gameData.winner === 'white') {
 			$winnerNameSpan.text(gameData.whiteName)
 			$loserNameSpan.text(gameData.blackName)
-			$pcsHomeSpan.text(15 - gameData.blackPiecesHome)
+			$pcsHomeSpan.text((15 - gameData.blackPiecesHome).toString())
 			$pcsBarSpan.text(gameData.barAtEnd)
 
 		} else {
 			$winnerNameSpan.text(gameData.blackName)
 			$loserNameSpan.text(gameData.whiteName)
-			$pcsHomeSpan.text(15 - gameData.whitePiecesHome)
+			$pcsHomeSpan.text((15 - gameData.whitePiecesHome).toString())
 			$pcsBarSpan.text(gameData.barAtEnd)
 		}
 

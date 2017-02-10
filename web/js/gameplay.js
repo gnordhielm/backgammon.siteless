@@ -335,6 +335,22 @@ function moveBuilder() {
 	}
 }
 
+// REFACTOR - if you click on the same piece twice, it should move the higher die.
+// if you click on a different piece, start the move building process over - same thing if 
+// you click on another point
+// Stop it from making both moves when you click from home to the bar.
+// -- or rather, let it, while there is really only one other possibility
+// right now, the overflow vetting is stopping me from moving anything inside the board.
+// I end up pushing undefined to my moves for the turn
+// it's literally like clockwork - any time I click on the point 0 or point 25 div, I get this error:
+// Uncaught TypeError: Cannot read property 'dieUsed' of undefined
+    // at Turn.updatePreview (constructors.js:113)
+    // at endMove (gameplay.js:431)
+    // at HTMLHeadingElement.<anonymous> (gameplay.js:396)
+    // at HTMLHeadingElement.dispatch (jquery-3.1.1.min.js:3)
+    // at HTMLHeadingElement.q.handle (jquery-3.1.1.min.js:3)
+
+
 // function for updating clickable things on the board
 // takes an array of move objects
 function updateClickable(arr, timesThrough) {
@@ -373,7 +389,7 @@ function updateClickable(arr, timesThrough) {
 			updateClickable(thisMoves, 2)
 
 			// in cases where, after the first winnow, only one move remains, play it.
-			if (thisMoves.length === 1) endMove()
+			// if (thisMoves.length === 1) endMove()
 
 			// second time through
 			} else if (timesThrough === 2) {
@@ -495,6 +511,10 @@ function DOMtoPosition(id, brd) {
 // checks to see if a spot on the given board is occupied by the
 // other player, and so cannot be moved to
 function isOccupied(point, brd, thisPlayer) {
+console.log('Arguments passed to isOccupied:')
+console.log(point)
+console.log(brd)
+console.log(thisPlayer)
 	// if this gets passed overshoot, just return false - overshoots are handled by projectMove
 	if (point === 'overshoot') return false
 	if (brd[point].length > 1) {
@@ -581,30 +601,36 @@ function projectMove(start, roll, player) {
 	if (player.barred) {
 		result = 'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + roll).toString()
 	// if the player is in their home stretch, project differently
-	// } else if (player.homeStretch) {
-	// 	result = 'point' + eval(start.slice(5) + player.operator + roll).toString()
-	// 	// calculate 'overshoot' for the particular player
-	// 	if (blackFictionalPoints.indexOf(result) !== -1) overshoot = blackFictionalPoints.indexOf(result) + 1
-	// 	if (whiteFictionalPoints.indexOf(result) !== -1) overshoot = whiteFictionalPoints.indexOf(result) + 1
-	// 	// check if there is overshoot, if not don't mess with the result
-	// 	if (overshoot > 0) {
-	// 		// compare overshoot to the distance of the farthest occupied point
-	// 		// the order of this array is very important - needs to count outward
-	// 		var farthestArr = [
-	// 			'point' + eval(player.home.slice(5) + them.operator + ' ' + 1).toString(),
-	// 			'point' + eval(player.home.slice(5) + them.operator + ' ' + 2).toString(),
-	// 			'point' + eval(player.home.slice(5) + them.operator + ' ' + 3).toString(),
-	// 			'point' + eval(player.home.slice(5) + them.operator + ' ' + 4).toString(),
-	// 			'point' + eval(player.home.slice(5) + them.operator + ' ' + 5).toString(),
-	// 			'point' + eval(player.home.slice(5) + them.operator + ' ' + 6).toString()
-	// 		]
-	// 		var farthest
-	// 		for (var i = 0; i < farthestArr.length; i++) {
-	// 			if (isThere(player, farthestArr[i])) farthest = i + 1
-	// 		}
-	// 		// if the dice equals or is less than the farthest occupied point, return overshoot
-	// 		if (roll <= farthest) result = 'overshoot'
-	// 	}
+	} else if (player.homeStretch) {
+		result = 'point' + eval(start.slice(5) + player.operator + roll).toString()
+		// calculate 'overshoot' for the particular player
+		if (blackFictionalPoints.indexOf(result) !== -1) overshoot = blackFictionalPoints.indexOf(result) + 1
+		if (whiteFictionalPoints.indexOf(result) !== -1) overshoot = whiteFictionalPoints.indexOf(result) + 1
+		// check if there is overshoot, if not don't mess with the result
+		if (overshoot > 0) {
+			// compare overshoot to the distance of the farthest occupied point
+			// the order of this array is very important - needs to count outward
+			var farthestArr = [
+				'point' + eval(player.home.slice(5) + them.operator + ' ' + 1).toString(),
+				'point' + eval(player.home.slice(5) + them.operator + ' ' + 2).toString(),
+				'point' + eval(player.home.slice(5) + them.operator + ' ' + 3).toString(),
+				'point' + eval(player.home.slice(5) + them.operator + ' ' + 4).toString(),
+				'point' + eval(player.home.slice(5) + them.operator + ' ' + 5).toString(),
+				'point' + eval(player.home.slice(5) + them.operator + ' ' + 6).toString()
+			]
+			var farthest
+			for (var i = 0; i < farthestArr.length; i++) {
+				if (isThere(player, farthestArr[i])) farthest = i + 1
+			}
+			// if the dice equals or is less than the farthest occupied point, return overshoot
+			if (roll <= farthest) result = 'overshoot'
+			// makes sure countOut is actually the board, flattens it to home (which will not be allowed)
+			if (blackFictionalPoints.includes(result)) {
+				result = 'point0'
+			} else if (whiteFictionalPoints.includes(result)) {
+				result = 'point25'
+			}
+		}
 	} else {
 		result = 'point' + eval(start.slice(5) + player.operator + ' ' + roll).toString()
 		// makes sure countOut is actually the board, flattens it to home (which will not be allowed)
