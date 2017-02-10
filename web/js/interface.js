@@ -453,8 +453,8 @@ function endGame() {
 			gameData.blackPiecesHome = null
 			gameData.winner = null
 			gameData.barAtEnd = null
-
 			databaseRef.set(gameData)
+			$(document).reload()
 		})
 	}
 }

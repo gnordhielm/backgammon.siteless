@@ -307,7 +307,7 @@ function moveBuilder() {
 		gameData.turnBuilder = firebasify(board)
 		gameData.whitePiecesHome = board.point25.length
 		gameData.blackPiecesHome = board.point0.length
-		gameDada.barAtEnd = board.bar.length
+		gameData.barAtEnd = board.bar.length
 		gameData.controllerToken = 5
 		databaseRef.set(gameData)
 	}
@@ -579,44 +579,34 @@ function projectMove(start, roll, player) {
 	var overshoot
 	// if the player is barred, project differently
 	if (player.barred) {
-console.log('player is barred')
 		result = 'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + roll).toString()
 	// if the player is in their home stretch, project differently
-	} else if (player.homeStretch) {
-console.log('player is in the home stretch')
-		result = 'point' + eval(start.slice(5) + player.operator + roll).toString()
-		// calculate 'overshoot' for the particular player
-		if (blackFictionalPoints.indexOf(result) !== -1) overshoot = blackFictionalPoints.indexOf(result) + 1
-		if (whiteFictionalPoints.indexOf(result) !== -1) overshoot = whiteFictionalPoints.indexOf(result) + 1
-		
-		// check if there is overshoot, if not don't mess with the result
-		if (overshoot > 0) {
-console.log('overshoot is greater than zero')
-			// compare overshoot to the distance of the farthest occupied point
-			// the order of this array is very important - needs to count outward
-			var farthestArr = [
-				'point' + eval(player.home.slice(5) + them.operator + ' ' + 1).toString(),
-				'point' + eval(player.home.slice(5) + them.operator + ' ' + 2).toString(),
-				'point' + eval(player.home.slice(5) + them.operator + ' ' + 3).toString(),
-				'point' + eval(player.home.slice(5) + them.operator + ' ' + 4).toString(),
-				'point' + eval(player.home.slice(5) + them.operator + ' ' + 5).toString(),
-				'point' + eval(player.home.slice(5) + them.operator + ' ' + 6).toString()
-			]
-			var farthest
-			for (var i = 0; i < farthestArr.length; i++) {
-				if (isThere(player, farthestArr[i])) farthest = i + 1
-			}
-			// if the dice equals or is less than the farthest occupied point, return overshoot
-console.log("farthest " +farthest)
-			if (roll <= farthest) result = 'overshoot'
-console.log("roll " +roll)
-		}
+	// } else if (player.homeStretch) {
+	// 	result = 'point' + eval(start.slice(5) + player.operator + roll).toString()
+	// 	// calculate 'overshoot' for the particular player
+	// 	if (blackFictionalPoints.indexOf(result) !== -1) overshoot = blackFictionalPoints.indexOf(result) + 1
+	// 	if (whiteFictionalPoints.indexOf(result) !== -1) overshoot = whiteFictionalPoints.indexOf(result) + 1
+	// 	// check if there is overshoot, if not don't mess with the result
+	// 	if (overshoot > 0) {
+	// 		// compare overshoot to the distance of the farthest occupied point
+	// 		// the order of this array is very important - needs to count outward
+	// 		var farthestArr = [
+	// 			'point' + eval(player.home.slice(5) + them.operator + ' ' + 1).toString(),
+	// 			'point' + eval(player.home.slice(5) + them.operator + ' ' + 2).toString(),
+	// 			'point' + eval(player.home.slice(5) + them.operator + ' ' + 3).toString(),
+	// 			'point' + eval(player.home.slice(5) + them.operator + ' ' + 4).toString(),
+	// 			'point' + eval(player.home.slice(5) + them.operator + ' ' + 5).toString(),
+	// 			'point' + eval(player.home.slice(5) + them.operator + ' ' + 6).toString()
+	// 		]
+	// 		var farthest
+	// 		for (var i = 0; i < farthestArr.length; i++) {
+	// 			if (isThere(player, farthestArr[i])) farthest = i + 1
+	// 		}
+	// 		// if the dice equals or is less than the farthest occupied point, return overshoot
+	// 		if (roll <= farthest) result = 'overshoot'
+	// 	}
 	} else {
-console.log(start)
-console.log(roll)
 		result = 'point' + eval(start.slice(5) + player.operator + ' ' + roll).toString()
-console.log(result)
-console.log(roll)
 		// makes sure countOut is actually the board, flattens it to home (which will not be allowed)
 		if (blackFictionalPoints.includes(result)) {
 			result = 'point0'

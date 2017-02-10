@@ -183,6 +183,9 @@ var Turn = function(player) {
 							// AND the point is not the player's home
 							// unless they are in home stretch
 							if (this.player.homeStretch) {
+								console.log(projection)
+								console.log(preview)
+								console.log(this.player)
 								if (!isOccupied(projection, preview, this.player) && 
 								projection !== 'overshoot') {
 									possible.push(new Move(preview[point][piece], projection))
