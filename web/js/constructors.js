@@ -130,7 +130,7 @@ var Turn = function(player) {
 		} else {
 			console.log('Preview is identical to the board.')	
 		}
-		visualizeBoard(preview)	
+		renderBoard(preview)	
 	}
 	this.possibleMoves = function() {
 		var possible = []

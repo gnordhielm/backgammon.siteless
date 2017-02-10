@@ -49,6 +49,8 @@ var gameData
 // 		blackName - str
 //		whiteName - str
 
+// RULE - before you set an event listener to an object, you explicity clear it of event listeners
+
 // Connect to the whole database with a "reference"
 var databaseRef = firebase.database().ref().child('gameData')
 
@@ -70,7 +72,7 @@ function dataChangeController(snapshot) {
 			openingRoll()
 			break
 		case 3:
-			startGame()
+			firstMove()
 			break
 		case 4:
 			// end of the game
@@ -84,6 +86,7 @@ function setUpGame() {
 	// no players in the database
 	if (gameData.whiteName === "" && gameData.blackName === "") {
 		// the player will commit their name to whiteName
+		$setUpForm.off()
 		$setUpForm.on('submit', function(event) {
 			// I have joined the game, set my color
 			myColor = "white"
@@ -151,116 +154,136 @@ function setUpGame() {
 			$opponentStatusImg.prop('src', './assets/ready_white.png') 
 		}
 		$setUpMsg.text('The game will begin shortly.')
-		// in several seconds, move to the opening roll
-		setTimeout(openingRoll, 2000)
-		//switch to the opening roll modal
+		// in several seconds, move to the opening roll by updating the controller token
 		setTimeout(function() {
-			$welcomeSetUpModal.removeClass('active-modal')
-			$openingRollModal.addClass('active-modal')
-		}, 2000)
+			gameData.controllerToken = 2
+			databaseRef.set(gameData)
+		}, 1500)
 	}
 }
 
 ///// PHASE 2 /////
 
 function openingRoll() {
-	// update the controller token
-	if (gameData.controllerToken === 1) {
-		gameData.controllerToken = 2
-		// commit the change
-		databaseRef.set(gameData)
+	//switch to the opening roll modal
+	if ($welcomeSetUpModal.hasClass('active-modal')) {
+console.log("the welcome modal is on")
+		$welcomeSetUpModal.removeClass('active-modal')
+		$openingRollModal.addClass('active-modal')
+	}
 
-		// make sure nothing else gets executed before the token is updated
-	} else if (myColor === 'white') {
+	if (myColor === 'white') {
+console.log("my color is white")
 		// if neither has already delivered a result
 		if (!gameData.whiteOpener && !gameData.blackOpener) {
+console.log("!gameData.whiteOpener && !gameData.blackOpener returns true")
 			// display names
 			$whiteDiceLabel.text(gameData.whiteName)
 			$blackDiceLabel.text(gameData.blackName)
 			// make my die active
 			$openingWhiteDice.addClass('active')
 			// when I click on it, roll it, delivering a result
+			$openingWhiteDice.off()
 			$openingWhiteDice.on('click', function(e) {
+console.log("the white dice was clicked")
 				//roll the dice, set the result appropriately
 				$openingWhiteDice.off()
 				var result = openingDiceAnimate('white')
 				setTimeout(function() {
+console.log("the dice roll was fired")
 					var roll = Math.floor(Math.random() * 6) + 1
 					gameData.whiteOpener = roll
 					$openingWhiteDice.attr('src', './assets/white_' + roll.toString() + '.png')
 					$openingWhiteDice.removeClass('active')
 					//commit the result
 					databaseRef.set(gameData)
+console.log("the white roll was set to the database")
 				}, 500)
 			})
-		// if I have already delivered a result
-		} else if (!!gameData.whiteOpener && !gameData.blackOpener){
-			// I don't think anything happens in this case...
-			
 		// if they have already delivered a result
 		} else if (!gameData.whiteOpener && !!gameData.blackOpener) {
+console.log("!gameData.whiteOpener && !!gameData.blackOpener returns true")
 			// display names
 			$whiteDiceLabel.text(gameData.whiteName)
 			$blackDiceLabel.text(gameData.blackName)
 			// make my die active
 			$openingWhiteDice.addClass('active')
 			// when I click on it, roll it, delivering a result
+			$openingWhiteDice.off()
 			$openingWhiteDice.on('click', function(e) {
+console.log("the white dice was clicked")
 				//roll the dice, set the result appropriately
 				$openingWhiteDice.off()
 				var result = openingDiceAnimate('white')
 				setTimeout(function() {
+console.log("the dice roll was fired")
 					var roll = Math.floor(Math.random() * 6) + 1
 					gameData.whiteOpener = roll
 					$openingWhiteDice.attr('src', './assets/white_' + roll.toString() + '.png')
 					$openingWhiteDice.removeClass('active')
 					//commit the result
 					databaseRef.set(gameData)
+console.log("the white roll was set to the database")
 				}, 500)
 			})
 			// render their roll
 			$openingBlackDice.attr('src', './assets/black_' + gameData.blackOpener.toString() + '.png')
+console.log("the black roll was rendered")
 
 		// if we both have already delivered a result
 		} else if (!!gameData.whiteOpener && !!gameData.blackOpener) {
+console.log("!!gameData.whiteOpener && !!gameData.blackOpener returned true")
 			// render their roll
 			$openingBlackDice.attr('src', './assets/black_' + gameData.blackOpener.toString() + '.png')
+console.log("the black roll was rendered")
 			// if the results are equal, start the hell over
 			if (gameData.whiteOpener === gameData.blackOpener) {
+console.log("gameData.whiteOpener === gameData.blackOpener returned true")
 				// DOM stuff, everybody has to do this.
 				$openingRollMsg.text("It's a tie, roll again.")
 				setTimeout(function(){
 					$openingWhiteDice.attr('src', './assets/white_naked.png')
 					$openingBlackDice.attr('src', './assets/black_naked.png')
+console.log("the dice were reset to naked")
 					// reset the dice
 					gameData.whiteOpener = null
 					gameData.blackOpener = null
+					gameData.controllerToken = 2
 					// commit the changes
+console.log(gameData)
 					databaseRef.set(gameData)
+console.log("the roll data was reset in the database")
 				}, 500)
-			} else {			
-				// compare the results
-				// alter the DOM
-				if (gameData.whiteOpener > gameData.blackOpener) {
+			} else if (gameData.whiteOpener > gameData.blackOpener) {
+console.log("gameData.whiteOpener > gameData.blackOpener returned true")
 				 	// if white goes first
 					$openingRollMsg.text(gameData.whiteName + " goes first!")
 					$openingBlackDice.attr('src', './assets/white_' + gameData.blackOpener.toString() + '.png')
-				} else {
+					// move to the next controller phase
+					setTimeout(function(){
+console.log("the current turn was set to white, the controller to 3, databse updated")
+						// hand over important information
+						gameData.currentTurn = "white"
+						gameData.controllerToken = 3
+						// commit the changes
+						databaseRef.set(gameData)
+					}, 1500)
+			} else if(gameData.whiteOpener < gameData.blackOpener) {
+console.log("gameData.whiteOpener < gameData.blackOpener returned true")
 				 	// if black goes first
 					$openingRollMsg.text(gameData.blackName + " goes first!")
 					$openingWhiteDice.attr('src', './assets/black_' + gameData.whiteOpener.toString() + '.png')
-				}
 				// move to the next controller phase
 				setTimeout(function(){
+console.log("the current turn was set to black, the controller to 3, databse updated")
 					// hand over important information
-					gameData.currentTurn = gameData.whiteOpener > gameData.blackOpener ? "white" : "black"
+					gameData.currentTurn = "black"
 					gameData.controllerToken = 3
 					// commit the changes
 					databaseRef.set(gameData)
-				}, 1000)
+				}, 1500)
 			}
 		}
-
 	} else if (myColor === 'black') {
 		// if neither has already delivered a result
 		if (!gameData.whiteOpener && !gameData.blackOpener) {
@@ -270,6 +293,7 @@ function openingRoll() {
 			// make my die active
 			$openingBlackDice.addClass('active')
 			// when I click on it, roll it, delivering a result
+			$openingBlackDice.off()
 			$openingBlackDice.on('click', function(e) {
 				//roll the dice, set the result appropriately
 				$openingBlackDice.off()
@@ -283,10 +307,6 @@ function openingRoll() {
 					databaseRef.set(gameData)
 				}, 500)
 			})
-		// if I have already delivered a result
-		} else if (!gameData.whiteOpener && !!gameData.blackOpener){
-			// I don't think anything happens in this case...
-			
 		// if they have already delivered a result
 		} else if (!!gameData.whiteOpener && !gameData.blackOpener) {
 			// display names
@@ -295,6 +315,7 @@ function openingRoll() {
 			// make my die active
 			$openingBlackDice.addClass('active')
 			// when I click on it, roll it, delivering a result
+			$openingBlackDice.off()
 			$openingBlackDice.on('click', function(e) {
 				//roll the dice, set the result appropriately
 				$openingBlackDice.off()
@@ -411,10 +432,15 @@ function testing() {
 
 // reset a set of explicitly declared values in the database
 function resetDatabase() {
+	// gameData.whiteName = "Ramses"
+	// gameData.blackName = "Hatshepsut"
+	// gameData.controllerToken = 3
+	// gameData.currentTurn = "white"
+
 	gameData.whiteName = ""
 	gameData.blackName = ""
-	gameData.controllerToken = 0
-	gameData.currentTurn = ""
+	gameData.controllerToken = 1
+	gameData.currentTurn = null
 
 	// gameData.whiteName = "Nora"
 	// gameData.blackName = "Gus"

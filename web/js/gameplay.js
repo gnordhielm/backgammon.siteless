@@ -2,34 +2,62 @@ console.log('gameplay.js connected')
 
 ///// Global Variables /////
 
-// changing these global variables should be done with care, I need to move from 
-// an objective view of the board to a subjective one, it's no longer black pieces vs white
-// it's my pieces versus theirs 
-
-var board // object which holds the state of the game
-
-var thisTurn // object with all kinds of functionality
+var board // object which holds the local state of the game
 var preview // copy of board used to test out moves
+
+var thisTurn // object which manages possible moves and enforcing rules
 var thisMoves // array of possible move objects
 
-var white // object for player one
-var black // object for player two
+// These objects have no bearing on the user. These are for the 'objective' game.
+var white // object for the player moving towards the white home
+var black // object for the player moving towards the black home
 
 ///// Gameplay DOM Selectors /////
 
 $setUpWrapper = $('#setup')
 $gameWrapper = $('#game')
 
+// $undoButton = $
+// $commitButton = $
+
 ///// PHASE 3 /////
 
-function startGame() {
-	console.log("game starts.")
-	// if this is our first time through.
+function firstMove() {
 	if ($openingRollModal.hasClass('active-modal')) {
 		// alter the DOM
 		$openingRollModal.removeClass('active-modal')
 		$setUpWrapper.removeClass('active-wrapper')
 		$gameWrapper.addClass('active-wrapper')
+	}
+	// if it's my turn
+	if (gameData.currentTurn === myColor) {
+		// create a new board
+		// render that board
+		// render my dice
+		// let me play:
+			// make my pieces clickable
+			// make movable points clickable
+			// make the undo and commit buttons live
+			// render my moves
+		// when I click 'commit'
+			// firebaseify the board object
+			// set the controller token to 4
+			// set it to gameData.board
+			// commit the change
+			// we will not come through here again!
+
+		console.log('current player')
+	// if it's not my turn, and I am either a player or a spectator
+	} else {
+		// create a new board
+		newBoard(gameData.whiteName, gameData.blackName)
+		console.log('other player')
+		// set the dice on the gameboard
+
+
+		// render that board
+		// render the current player's dice
+		// when they commit, we will all leave this function
 	}
 
 	// set up the actual game interface
@@ -44,7 +72,7 @@ function startGame() {
 
 ///// Game Setup Functions /////
 
-function newGame(whiteName, blackName) {
+function newBoard(whiteName, blackName) {
 	white = new Player(whiteName, 'white')
 	white.dice = [new Dice(), new Dice()]
 	black = new Player(blackName, 'black')
@@ -244,7 +272,7 @@ function endMove() {
 	// preview the turn
 	thisTurn.updatePreview()
 	// visualize the preview board
-	visualizeBoard(preview)
+	renderBoard(preview)
 	// start a new move
 	moveBuilder()
 }
@@ -281,17 +309,6 @@ function endGame(winner) {
 //  
 
 ///// Helper Functions /////
-
-function visualizeBoard(brd) {
-	for (var point in brd) {
-		for (var i in brd[point]) {
-			var $piece = $('#' + brd[point][i].declare())
-			$piece.css('left', gridLookup(point, i, 'left'))
-			$piece.css('top', gridLookup(point, i, 'top'))
-		}
-	}
-	console.log('!!! updated the DOM with visualizeboard')
-}
 
 function DOMtoPiece(id) {
 	for (var point in board) {
@@ -444,47 +461,66 @@ function projectMove(start, roll, player) {
 	return result
 }
 
-function gridLookup(point, position, axis) {
-	if (axis === 'left') {
-		var left = {
-			point1: 458, point24: 458, 
-			point2: 421, point23: 421, 
-			point3: 385, point22: 385, 
-			point4: 347, point21: 347, 
-			point5: 311, point20: 311, 
-			point6: 273, point19: 273, 
-			point7: 212, point18: 212, 
-			point8: 175, point17: 175, 
-			point9: 137, point16: 137, 
-			point10: 100, point15: 100, 
-			point11: 64, point14: 64, 
-			point12: 26, point13: 26, 
-			bar: 242,
-			point0: 515, point25: 515
+// given a board object with valid pieces, arranges the DOM to visualize it
+function renderBoard(brd) {
+	for (var point in brd) {
+		for (var i in brd[point]) {
+			var $piece = $('#' + brd[point][i].declare())
+			$piece.attr('x', gridLookup(point, i, 'x'))
+			$piece.attr('y', gridLookup(point, i, 'y'))
 		}
-		return left[point].toString() + 'px'
-	} else if (axis === 'top') {
+	}
+}
+
+// given a position, point, and axis - returns the proper spot on the board
+// for this piece to be positioned
+function gridLookup(point, position, axis) {
+	if (axis === 'x') {
+		var x = {
+			point0: 1124.97, point25: 1124.97,
+			point1: 1011.32, point24: 1011.32, 
+			point2: 929.35, point23: 929.35, 
+			point3: 847.38, point22: 847.38, 
+			point4: 765.41, point21: 765.41, 
+			point5: 683.44, point20: 683.44, 
+			point6: 601.47, point19: 601.47, 
+			point7: 420.1, point18: 420.1, 
+			point8: 338.13, point17: 338.13, 
+			point9: 256.16, point16: 256.16, 
+			point10: 174.19, point15: 174.19, 
+			point11: 92.22, point14: 92.22, 
+			point12: 10.25, point13: 10.25, 
+			bar: 504.61
+		}
+		return x[point]
+	} else if (axis === 'y') {
 		var top
 		if (point.toString() === 'bar') {
-			top = {0: 228, 1: 211, 2: 188, 3: 171, 4: 154, 
-					5: 154, 6: 154, 7: 154, 8: 154, 9: 154, 
-					10: 154, 11: 154, 12: 154, 13: 154, 14: 154}
-		} else if (point.toString() === 'point25') {
-			top = {0: 20, 1: 28, 2: 36, 3: 44, 4: 52, 
-					5: 60, 6: 68, 7: 76, 8: 84, 9: 92, 
-					10: 100, 11: 108, 12: 116, 13: 124, 14: 132}
+			if (parseInt(position) >= 4) {
+				return 452.02
+			} else {
+				top = {0: 340.51, 1: 368.39, 2: 396.27, 3: 424.14}
+			}
 		} else if (point.toString() === 'point0') {
-			top = {0: 270, 1: 278, 2: 286, 3: 294, 4: 302, 
-					5: 310, 6: 318, 7: 326, 8: 334, 9: 342, 
-					10: 350, 11: 358, 12: 366, 13: 374, 14: 382}
+			top = {0: 17.19, 1: 37.78, 2: 58.37, 3: 78.96, 4: 99.55, 
+					5: 120.14, 6: 140.73, 7: 161.32, 8: 181.91, 9: 202.5, 
+					10: 223.09, 11: 243.68, 12: 264.27, 13: 284.86, 14: 305.45}
+		} else if (point.toString() === 'point25') {
+			top = {0: 784.43, 1: 763.84, 2: 743.25, 3: 722.66, 4: 702.07, 
+					5: 681.48, 6: 660.89, 7: 640.3, 8: 619.71, 9: 599.12, 
+					10: 578.53, 11: 557.94, 12: 537.35, 13: 516.76, 14: 496.17}
 		} else if (parseInt(point.toString().slice(5)) <= 12){
-			top = {0: 390, 1: 355, 2: 320, 3: 285, 4: 250, 
-					5: 240, 6: 240, 7: 240, 8: 240, 9: 240, 
-					10: 240, 11: 240, 12: 240, 13: 240, 14: 240}
+			if (parseInt(position) >= 5) {
+				return 452.02
+			} else {
+				top = {0: 760.23, 1: 704.47, 2: 648.71, 3: 592.96, 4: 537.2}
+			}
 		} else {
-			top = {0: 20, 1: 55, 2: 90, 3: 125, 4: 160, 
-					5: 30, 6: 30, 7: 30, 8: 30, 9: 30, 
-					10: 30, 11: 30, 12: 30, 13: 30, 14: 30}
+			if (parseInt(position) >= 5) {
+				return 310.84
+			} else {
+				top = {0: 32.06, 1: 87.82, 2: 143.57, 3: 199.33, 4: 255.08}
+			}
 		}
 		return top[position]
 	} else {

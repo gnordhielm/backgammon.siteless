@@ -41,9 +41,16 @@ My **Minimum Viable Product** was a game of backgammon two players could play on
 <img src="./readme-images/board.png" style="width: 150px;">
 <img src="./readme-images/early-browser.png" style="width: 150px;">
 
+## Unsolved Problems
+
+Little bugs I should fix, but haven't yet.
+
+* Tie on opening roll advances to game board. I have tried to recreate the problem by manipulating the database directly and seeing what the browsers do, but it only happens when the browsers trigger the tie themselves.
+* There is a bug where from the perspective of whites, their die changes to the other color when they win the roll.
+
 ## To Dos
 
-These features/fixes aren't essential to the useability of the app, but I'd like to implement them at some point in the future.
+These features aren't essential to the useability of the app, but I'd like to implement them at some point in the future.
 
 * Options for spectators to join a game - at setup or while it's in progress - as spectators.
 * An 'I want to play the next game' button that lets spectators indicate that they'd like to play. The result of a click on that button would be displayed on the game-end modal.
