@@ -390,7 +390,7 @@ function updateClickable(arr, timesThrough) {
 
 			// in cases where, after the first winnow, only one move remains, play it.
 			// as long as we are not in the home stretch.
-			if (thisMoves.length === 1) endMove()
+			if (thisMoves.length === 1 && !thisTurn.player.homeStretch) endMove()
 
 			// second time through
 			} else if (timesThrough === 2) {
