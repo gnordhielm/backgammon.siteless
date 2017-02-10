@@ -389,7 +389,8 @@ function updateClickable(arr, timesThrough) {
 			updateClickable(thisMoves, 2)
 
 			// in cases where, after the first winnow, only one move remains, play it.
-			// if (thisMoves.length === 1) endMove()
+			// as long as we are not in the home stretch.
+			if (thisMoves.length === 1) endMove()
 
 			// second time through
 			} else if (timesThrough === 2) {
@@ -415,9 +416,9 @@ function updateClickable(arr, timesThrough) {
 
 // takes a type (point/piece) as a string and the particular value as a string
 // used by updateClickable to narrow thisMoves down to only moves with that value
-function winnowMoves(type, id) {
+function winnowMoves(type, id, pass) {
 	var result = []
-	// loop through thisMoves, cut away everything of the type which isn't the id
+	// loop through thisMoves, cut away everything of the type which doesn't include the id
 	switch(type) {
 		case 'point':
 			for (var move in thisMoves) {
@@ -623,9 +624,10 @@ function projectMove(start, roll, player) {
 				if (isThere(player, farthestArr[i])) farthest = i + 1
 			}
 			// if the dice equals or is less than the farthest occupied point, return overshoot
-			if (roll <= farthest) result = 'overshoot'
-			// makes sure countOut is actually the board, flattens it to home (which will not be allowed)
-			if (blackFictionalPoints.includes(result)) {
+			if (roll <= farthest) {
+				result = 'overshoot'
+			// otherwise, just flatten it to home
+			} else if (blackFictionalPoints.includes(result)) {
 				result = 'point0'
 			} else if (whiteFictionalPoints.includes(result)) {
 				result = 'point25'

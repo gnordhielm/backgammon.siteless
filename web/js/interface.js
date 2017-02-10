@@ -421,6 +421,8 @@ function endGame() {
 		$('#play-again').on('click', function(e){
 			$('#play-again').off()
 			$('#play-again').removeClass('active')
+			$gameEndModal.removeClass('active-modal')
+			$welcomeSetUpModal.addClass('active-modal')
 			gameData.controllerToken = 2
 			gameData.currentTurn = null
 			gameData.currentRoll0 = null
@@ -440,6 +442,8 @@ function endGame() {
 		$('#leave-game').on('click', function(e){
 			$('#leave-game').off()
 			$('#leave-game').removeClass('active')
+			$gameEndModal.removeClass('active-modal')
+			$welcomeSetUpModal.addClass('active-modal')
 			gameData.whiteName = ""
 			gameData.blackName = ""
 			gameData.controllerToken = 1
@@ -454,7 +458,6 @@ function endGame() {
 			gameData.winner = null
 			gameData.barAtEnd = null
 			databaseRef.set(gameData)
-			$(document).reload()
 		})
 	}
 }
