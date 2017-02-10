@@ -77,7 +77,6 @@ var BackgammonBoard = function() {
 
 var Turn = function(player) {
 	this.player = player
-	
 	// uses the player's dice to see if they match, are 'doubles'
 	this.doubles = (this.player.dice[0].value === this.player.dice[1].value) ? true : false
 	
@@ -227,8 +226,8 @@ var Move = function(piece, destination) {
 	this.updatePlayers = function() {
 		// did I capture another piece
 		if (this.isEat) {
-			getOtherPlayer(this.piece.player).barred = true
-			getOtherPlayer(this.piece.player).homeStretch = false
+			them.barred = true
+			them.homeStretch = false
 		} 
 		
 		// did I win the game
@@ -240,13 +239,13 @@ var Move = function(piece, destination) {
 	}
 	this.restoreToken = [this.piece.player.barred, 
 						 this.piece.player.homeStretch,
-						 getOtherPlayer(this.piece.player).barred, 
-						 getOtherPlayer(this.piece.player).homeStretch] // [true, false, false, false]
+						 them.barred, 
+						 them.homeStretch] // [true, false, false, false]
 	this.restorePlayers = function() {
 		this.piece.player.barred = this.restoreToken[0]
 		this.piece.player.homeStretch = this.restoreToken[1]
-		getOtherPlayer(this.piece.player).barred = this.restoreToken[2]
-		getOtherPlayer(this.piece.player).homeStretch = this.restoreToken[3]
+		them.barred = this.restoreToken[2]
+		them.homeStretch = this.restoreToken[3]
 		console.log("Restored players.")
 	}
 }

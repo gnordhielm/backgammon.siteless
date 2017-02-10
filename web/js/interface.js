@@ -40,8 +40,11 @@ $leaveButton = $('#leave-game')
 // make sure you very explicitly think about what happens if someone shows up to your game
 // while it's in progress. Happily, anyone who hasn't submitted a form doesn't have a myColor.
 // Take advantage of that.
-var myColor = null
-var theirColor = null
+var myColor
+var myName
+
+var theirColor
+var theirName
 
 var gameData
 // This is where firebase data will be stored
@@ -88,9 +91,10 @@ function setUpGame() {
 		// the player will commit their name to whiteName
 		$setUpForm.off()
 		$setUpForm.on('submit', function(event) {
-			// I have joined the game, set my color
+			// I have joined the game, set my color and name
 			myColor = "white"
 			theirColor = "black"
+			myName = $nameInput.val()
 		    // Disable the button
 		    $submitNameButton.prop('disabled', true)
 		    // Update the gameData
@@ -116,9 +120,10 @@ function setUpGame() {
 			$setUpForm.off()
 			// add the listener that commits to black name
 			$setUpForm.on('submit', function(event) {
-				// I have joined the game, set my color
+				// I have joined the game, set my color and name
 				myColor = "black"
 				theirColor = "white"
+				myName = $nameInput.val()
 			    // Disable the button
 			    $submitNameButton.prop('disabled', true)
 			    // Update the gameData
@@ -167,16 +172,15 @@ function setUpGame() {
 function openingRoll() {
 	//switch to the opening roll modal
 	if ($welcomeSetUpModal.hasClass('active-modal')) {
-console.log("the welcome modal is on")
 		$welcomeSetUpModal.removeClass('active-modal')
 		$openingRollModal.addClass('active-modal')
 	}
 
 	if (myColor === 'white') {
-console.log("my color is white")
+		// set their name
+		theirName = gameData.blackName
 		// if neither has already delivered a result
 		if (!gameData.whiteOpener && !gameData.blackOpener) {
-console.log("!gameData.whiteOpener && !gameData.blackOpener returns true")
 			// display names
 			$whiteDiceLabel.text(gameData.whiteName)
 			$blackDiceLabel.text(gameData.blackName)
@@ -185,24 +189,20 @@ console.log("!gameData.whiteOpener && !gameData.blackOpener returns true")
 			// when I click on it, roll it, delivering a result
 			$openingWhiteDice.off()
 			$openingWhiteDice.on('click', function(e) {
-console.log("the white dice was clicked")
 				//roll the dice, set the result appropriately
 				$openingWhiteDice.off()
 				var result = openingDiceAnimate('white')
 				setTimeout(function() {
-console.log("the dice roll was fired")
 					var roll = Math.floor(Math.random() * 6) + 1
 					gameData.whiteOpener = roll
 					$openingWhiteDice.attr('src', './assets/white_' + roll.toString() + '.png')
 					$openingWhiteDice.removeClass('active')
 					//commit the result
 					databaseRef.set(gameData)
-console.log("the white roll was set to the database")
 				}, 500)
 			})
 		// if they have already delivered a result
 		} else if (!gameData.whiteOpener && !!gameData.blackOpener) {
-console.log("!gameData.whiteOpener && !!gameData.blackOpener returns true")
 			// display names
 			$whiteDiceLabel.text(gameData.whiteName)
 			$blackDiceLabel.text(gameData.blackName)
@@ -211,57 +211,45 @@ console.log("!gameData.whiteOpener && !!gameData.blackOpener returns true")
 			// when I click on it, roll it, delivering a result
 			$openingWhiteDice.off()
 			$openingWhiteDice.on('click', function(e) {
-console.log("the white dice was clicked")
 				//roll the dice, set the result appropriately
 				$openingWhiteDice.off()
 				var result = openingDiceAnimate('white')
 				setTimeout(function() {
-console.log("the dice roll was fired")
 					var roll = Math.floor(Math.random() * 6) + 1
 					gameData.whiteOpener = roll
 					$openingWhiteDice.attr('src', './assets/white_' + roll.toString() + '.png')
 					$openingWhiteDice.removeClass('active')
 					//commit the result
 					databaseRef.set(gameData)
-console.log("the white roll was set to the database")
 				}, 500)
 			})
 			// render their roll
 			$openingBlackDice.attr('src', './assets/black_' + gameData.blackOpener.toString() + '.png')
-console.log("the black roll was rendered")
 
 		// if we both have already delivered a result
 		} else if (!!gameData.whiteOpener && !!gameData.blackOpener) {
-console.log("!!gameData.whiteOpener && !!gameData.blackOpener returned true")
 			// render their roll
 			$openingBlackDice.attr('src', './assets/black_' + gameData.blackOpener.toString() + '.png')
-console.log("the black roll was rendered")
 			// if the results are equal, start the hell over
 			if (gameData.whiteOpener === gameData.blackOpener) {
-console.log("gameData.whiteOpener === gameData.blackOpener returned true")
 				// DOM stuff, everybody has to do this.
 				$openingRollMsg.text("It's a tie, roll again.")
 				setTimeout(function(){
 					$openingWhiteDice.attr('src', './assets/white_naked.png')
 					$openingBlackDice.attr('src', './assets/black_naked.png')
-console.log("the dice were reset to naked")
 					// reset the dice
 					gameData.whiteOpener = null
 					gameData.blackOpener = null
 					gameData.controllerToken = 2
 					// commit the changes
-console.log(gameData)
 					databaseRef.set(gameData)
-console.log("the roll data was reset in the database")
 				}, 500)
 			} else if (gameData.whiteOpener > gameData.blackOpener) {
-console.log("gameData.whiteOpener > gameData.blackOpener returned true")
 				 	// if white goes first
 					$openingRollMsg.text(gameData.whiteName + " goes first!")
 					$openingBlackDice.attr('src', './assets/white_' + gameData.blackOpener.toString() + '.png')
 					// move to the next controller phase
 					setTimeout(function(){
-console.log("the current turn was set to white, the controller to 3, databse updated")
 						// hand over important information
 						gameData.currentTurn = "white"
 						gameData.controllerToken = 3
@@ -269,13 +257,11 @@ console.log("the current turn was set to white, the controller to 3, databse upd
 						databaseRef.set(gameData)
 					}, 1500)
 			} else if(gameData.whiteOpener < gameData.blackOpener) {
-console.log("gameData.whiteOpener < gameData.blackOpener returned true")
 				 	// if black goes first
 					$openingRollMsg.text(gameData.blackName + " goes first!")
 					$openingWhiteDice.attr('src', './assets/black_' + gameData.whiteOpener.toString() + '.png')
 				// move to the next controller phase
 				setTimeout(function(){
-console.log("the current turn was set to black, the controller to 3, databse updated")
 					// hand over important information
 					gameData.currentTurn = "black"
 					gameData.controllerToken = 3
@@ -285,6 +271,8 @@ console.log("the current turn was set to black, the controller to 3, databse upd
 			}
 		}
 	} else if (myColor === 'black') {
+		// set their name
+		theirName = gameData.whiteName
 		// if neither has already delivered a result
 		if (!gameData.whiteOpener && !gameData.blackOpener) {
 			// display names
@@ -432,22 +420,30 @@ function testing() {
 
 // reset a set of explicitly declared values in the database
 function resetDatabase() {
-	// gameData.whiteName = "Ramses"
-	// gameData.blackName = "Hatshepsut"
-	// gameData.controllerToken = 3
-	// gameData.currentTurn = "white"
+	// gameData.whiteName = ""
+	// gameData.blackName = ""
+	// gameData.controllerToken = 1
+	// gameData.currentTurn = null
+	// gameData.whiteOpener = null
+	// gameData.blackOpener = null
 
-	gameData.whiteName = ""
-	gameData.blackName = ""
-	gameData.controllerToken = 1
-	gameData.currentTurn = null
+	myColor = 'white'
+	myName = 'David'
 
-	// gameData.whiteName = "Nora"
-	// gameData.blackName = "Gus"
-	// gameData.controllerToken = 2
+	theirColor = 'black'
+	theirName = 'Goliath'
 
-	gameData.whiteOpener = null
-	gameData.blackOpener = null
+	gameData.whiteName = "David"
+	gameData.blackName = "Goliath"
+	gameData.controllerToken = 3
+	gameData.currentTurn = 'white'
+	gameData.whiteOpener = 6
+	gameData.blackOpener = 2
+
+		$welcomeSetUpModal.removeClass('active-modal')
+			$openingRollModal.removeClass('active-modal')
+		$setUpWrapper.removeClass('active-wrapper')
+			$gameWrapper.addClass('active-wrapper')
 
 	databaseRef.set(gameData)
 }

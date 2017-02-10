@@ -8,14 +8,19 @@ var preview // copy of board used to test out moves
 var thisTurn // object which manages possible moves and enforcing rules
 var thisMoves // array of possible move objects
 
-// These objects have no bearing on the user. These are for the 'objective' game.
-var white // object for the player moving towards the white home
-var black // object for the player moving towards the black home
+var them // stores the object of the other player
+var me // stores the object of my player
 
 ///// Gameplay DOM Selectors /////
 
 $setUpWrapper = $('#setup')
 $gameWrapper = $('#game')
+
+$whitePlayerName = $('#white-dashboard-name')
+$blackPlayerName = $('#black-dashboard-name')
+
+$dice0 = $('#dice-0')
+$dice1 = $('#dice-1')
 
 // $undoButton = $
 // $commitButton = $
@@ -28,17 +33,37 @@ function firstMove() {
 		$openingRollModal.removeClass('active-modal')
 		$setUpWrapper.removeClass('active-wrapper')
 		$gameWrapper.addClass('active-wrapper')
-	}
+			}
 	// if it's my turn
 	if (gameData.currentTurn === myColor) {
+
+		// create the player objects
+		me = new Player(myName, myColor)
+		them = new Player(theirName, theirColor)
+		// create dice for the player objects
+		them.dice = [new Dice(), new Dice()]
+		me.dice = [new Dice(), new Dice()]
+		// assign values to my dice
+		me.dice[0].value = gameData.whiteOpener
+		console.log(me.dice[0].value)
+		me.dice[1].value = gameData.blackOpener
+		console.log(me.dice[1].value)
 		// create a new board
+		newBoard(me, them)
 		// render that board
+		renderBoard(board)
 		// render my dice
+		$dice0.attr('src', './assets/' + gameData.currentTurn + '_' + gameData.whiteOpener + '.png')
+		$dice1.attr('src', './assets/' + gameData.currentTurn + '_' + gameData.blackOpener + '.png')
+		// render player names
+		$whitePlayerName.text(gameData.whiteName)
+		$blackPlayerName.text(gameData.blackName)
 		// let me play:
-			// make my pieces clickable
-			// make movable points clickable
-			// make the undo and commit buttons live
-			// render my moves
+		// make my pieces clickable
+		turnBuilder(me)
+		// make movable points clickable
+		// make the undo and commit buttons live
+		// render my moves
 		// when I click 'commit'
 			// firebaseify the board object
 			// set the controller token to 4
@@ -46,19 +71,52 @@ function firstMove() {
 			// commit the change
 			// we will not come through here again!
 
-		console.log('current player')
-	// if it's not my turn, and I am either a player or a spectator
-	} else {
+	// if it's not my turn, and I am a player
+	} else if (!!myColor){
+		// create the player objects
+		me = new Player(myName, myColor)
+		them = new Player(theirName, theirColor)
+		// create dice for the player objects
+		them.dice = [new Dice(), new Dice()]
+		me.dice = [new Dice(), new Dice()]
 		// create a new board
-		newBoard(gameData.whiteName, gameData.blackName)
-		console.log('other player')
-		// set the dice on the gameboard
-
-
+		newBoard(me, them)
 		// render that board
+		renderBoard(board)
 		// render the current player's dice
-		// when they commit, we will all leave this function
+		$dice0.attr('src', './assets/' + gameData.currentTurn + '_' + gameData.whiteOpener + '.png')
+		$dice1.attr('src', './assets/' + gameData.currentTurn + '_' + gameData.blackOpener + '.png')
+		// render player names
+		$whitePlayerName.text(gameData.whiteName)
+		$blackPlayerName.text(gameData.blackName)
+		// when they commit, we will all leave this godforsaken function
+	
+	// if I am not a player 
+	} else {
+		// ensure old modals are gone
+		$welcomeSetUpModal.removeClass('active-modal')
+		$openingRollModal.removeClass('active-modal')
+		$setUpWrapper.removeClass('active-wrapper')
+		$gameWrapper.addClass('active-wrapper')
+		// create the player objects
+		me = new Player(gameData.whiteName, "white")
+		them = new Player(gameData.blackName, "black")
+		// create dice for the player objects
+		me.dice = [new Dice(), new Dice()]
+		them.dice = [new Dice(), new Dice()]
+		// create a new board
+		newBoard(me, them)
+		// render that board
+		renderBoard(board)
+		// render the current player's dice
+		$dice0.attr('src', './assets/' + gameData.currentTurn + '_' + gameData.whiteOpener + '.png')
+		$dice1.attr('src', './assets/' + gameData.currentTurn + '_' + gameData.blackOpener + '.png')
+		// render player names
+		$whitePlayerName.text(gameData.whiteName)
+		$blackPlayerName.text(gameData.blackName)
+
 	}
+}
 
 	// set up the actual game interface
 	// if there is a winner, move to the next phase
@@ -67,25 +125,30 @@ function firstMove() {
 	// let somebody pass that info back to the database
 	// because this is all based on the board, and the board doesn't let you make illegal moves,
 	// the only challenge here is going to be undoing the gameflow I put together.
-}
 
 
 ///// Game Setup Functions /////
 
-function newBoard(whiteName, blackName) {
-	white = new Player(whiteName, 'white')
-	white.dice = [new Dice(), new Dice()]
-	black = new Player(blackName, 'black')
-	black.dice = [new Dice(), new Dice()]
-
+function newBoard(playerObj1, playerObj2) {
 	board = new BackgammonBoard()
-	var whitePieces = []
-	for (var i = 1; i <= 15; i++) {
-		whitePieces.push(new Piece(i, white))
-	}
-	var blackPieces = []
-	for (var i = 1; i <= 15; i++) {
-		blackPieces.push(new Piece(i, black))
+	if (playerObj1.color === "white") {
+		var whitePieces = []
+		for (var i = 1; i <= 15; i++) {
+			whitePieces.push(new Piece(i, playerObj1))
+		}
+		var blackPieces = []
+		for (var i = 1; i <= 15; i++) {
+			blackPieces.push(new Piece(i, playerObj2))
+		}
+	} else {
+		var whitePieces = []
+		for (var i = 1; i <= 15; i++) {
+			whitePieces.push(new Piece(i, playerObj2))
+		}
+		var blackPieces = []
+		for (var i = 1; i <= 15; i++) {
+			blackPieces.push(new Piece(i, playerObj1))
+		}
 	}
 	board.point24 = blackPieces.splice(-2)
 	board.point19 = whitePieces.splice(-5)
@@ -99,30 +162,6 @@ function newBoard(whiteName, blackName) {
 
 ///// Gameplay Functions /////
 
-// determines who goes first and what roll they use
-// function openingRoll() {
-// 	white.dice[0].roll()
-// 	console.log(white.name + ' rolled a ' + white.dice[0].declare())
-// 	black.dice[0].roll()
-// 	console.log(black.name + ' rolled a ' + black.dice[0].declare())
-// 	if (white.dice[0].value === black.dice[0].value) {
-// 		console.log('Tie on opening roll, rolling again...')
-//  		openingRoll()
-//  	} else if (white.dice[0].value > black.dice[0].value) {
-//  		white.dice[1].value = black.dice[0].value
-// 		console.log(white.name + ' goes first.')
-// 		console.log('--------------------------')
-// 		turnBuilder(white)
-// 	} else if (white.dice[0].value < black.dice[0].value) {
-// 		black.dice[1].value = white.dice[0].value
-// 		console.log(black.name + ' goes first.')
-// 		console.log('--------------------------')
-// 		turnBuilder(black)
-// 	} else {
-// 		console.log('!!! the openingRoll function is broken.')
-// 	}
-// }
-
 // creates a new turn object and builds moves for it
 function turnBuilder(player) {
 	thisTurn = new Turn(player) 
@@ -131,7 +170,6 @@ function turnBuilder(player) {
 	moveBuilder()
 
 }
-
 
 function moveBuilder() {
 
@@ -280,15 +318,12 @@ function endMove() {
 
 // handles the transition into the next player's turn
 function endTurn() {
-	// commit this player's moves
+	// commit my moves
 	thisTurn.commitToBoard()
 
 	// roll the other player's dice
-	getOtherPlayer(thisTurn.player).dice[0].roll()
-	getOtherPlayer(thisTurn.player).dice[1].roll()
-
-	// start a new turn with whoever is not this player
-	turnBuilder(getOtherPlayer(thisTurn.player))
+	them.dice[0].roll()
+	them.dice[1].roll()
 }
 
 ///// Game End Functions /////
@@ -340,15 +375,6 @@ function isOccupied(point, brd, thisPlayer) {
 	} else {
 		return false
 	}		
-}
-
-//returns the player you don't pass to it
-function getOtherPlayer(player) {
-	if (player.color === "white") {
-		return black
-	} else {
-		return white
-	}
 }
 
 //returns an array of this player's pieces on the preview board
@@ -435,12 +461,12 @@ function projectMove(start, roll, player) {
 			// compare overshoot to the distance of the farthest occupied point
 			// the order of this array is very important - needs to count outward
 			var farthestArr = [
-				'point' + eval(player.home.slice(5) + getOtherPlayer(player).operator + ' ' + 1).toString(),
-				'point' + eval(player.home.slice(5) + getOtherPlayer(player).operator + ' ' + 2).toString(),
-				'point' + eval(player.home.slice(5) + getOtherPlayer(player).operator + ' ' + 3).toString(),
-				'point' + eval(player.home.slice(5) + getOtherPlayer(player).operator + ' ' + 4).toString(),
-				'point' + eval(player.home.slice(5) + getOtherPlayer(player).operator + ' ' + 5).toString(),
-				'point' + eval(player.home.slice(5) + getOtherPlayer(player).operator + ' ' + 6).toString()
+				'point' + eval(player.home.slice(5) + them.operator + ' ' + 1).toString(),
+				'point' + eval(player.home.slice(5) + them.operator + ' ' + 2).toString(),
+				'point' + eval(player.home.slice(5) + them.operator + ' ' + 3).toString(),
+				'point' + eval(player.home.slice(5) + them.operator + ' ' + 4).toString(),
+				'point' + eval(player.home.slice(5) + them.operator + ' ' + 5).toString(),
+				'point' + eval(player.home.slice(5) + them.operator + ' ' + 6).toString()
 			]
 			var farthest
 			for (var i = 0; i < farthestArr.length; i++) {

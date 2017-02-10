@@ -148,7 +148,12 @@ h1 {
 	left: 620px;
 	top: -310px;
 
+	width: 150px;
 	font-family: sans-serif;
+}
+
+#dashboards > h2 {
+	padding-left: 15px;
 }
 
 #white-dashboard-name{
