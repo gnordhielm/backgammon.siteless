@@ -16,8 +16,8 @@ var me // stores the object of my player
 $setUpWrapper = $('#setup')
 $gameWrapper = $('#game')
 
-$whitePlayerName = $('#whiteHome')
-$blackPlayerName = $('#blackHome')
+$whitePlayerName = $('#point25')
+$blackPlayerName = $('#point0')
 
 $diceHolder = $('#dice')
 $dice0 = $('#dice-0')
@@ -579,9 +579,11 @@ function projectMove(start, roll, player) {
 	var overshoot
 	// if the player is barred, project differently
 	if (player.barred) {
+console.log('player is barred')
 		result = 'point' + eval(player.barCountOut.slice(5) + player.operator + ' ' + roll).toString()
 	// if the player is in their home stretch, project differently
 	} else if (player.homeStretch) {
+console.log('player is in the home stretch')
 		result = 'point' + eval(start.slice(5) + player.operator + roll).toString()
 		// calculate 'overshoot' for the particular player
 		if (blackFictionalPoints.indexOf(result) !== -1) overshoot = blackFictionalPoints.indexOf(result) + 1
@@ -589,6 +591,7 @@ function projectMove(start, roll, player) {
 		
 		// check if there is overshoot, if not don't mess with the result
 		if (overshoot > 0) {
+console.log('overshoot is greater than zero')
 			// compare overshoot to the distance of the farthest occupied point
 			// the order of this array is very important - needs to count outward
 			var farthestArr = [
@@ -604,10 +607,16 @@ function projectMove(start, roll, player) {
 				if (isThere(player, farthestArr[i])) farthest = i + 1
 			}
 			// if the dice equals or is less than the farthest occupied point, return overshoot
+console.log("farthest " +farthest)
 			if (roll <= farthest) result = 'overshoot'
+console.log("roll " +roll)
 		}
 	} else {
-		result = 'point' + eval(start.slice(5) + player.operator + roll).toString()
+console.log(start)
+console.log(roll)
+		result = 'point' + eval(start.slice(5) + player.operator + ' ' + roll).toString()
+console.log(result)
+console.log(roll)
 		// makes sure countOut is actually the board, flattens it to home (which will not be allowed)
 		if (blackFictionalPoints.includes(result)) {
 			result = 'point0'

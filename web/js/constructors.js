@@ -211,7 +211,7 @@ var Turn = function(player) {
 // keep an eye on this - dieUsed especially. Vetting should happen upstream. 
 var Move = function(piece, destination) {
 	this.piece = piece // white11
-	this.location = (this.piece.declare(), preview)// 'point5'
+	this.location = DOMtoPosition(this.piece.declare(), preview)// 'point5'
 	this.destination = destination // 'point0'
 	this.dieUsed = this.location === 'bar' ? 
 				   Math.abs(parseInt(this.piece.player.barCountOut.slice(5)) - parseInt(this.destination.slice(5))):

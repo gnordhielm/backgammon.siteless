@@ -27,10 +27,6 @@ $pcsHomeSpan = $('#pcs-home')
 $pcsBarSpan = $('#pcs-bar')
 
 $buttonHolder = $('#button-holder')
-$playAgainButton = $('#play-again')
-// go back to opening roll
-$leaveButton = $('#leave-game')
-// go back to signin
 
 
 ///// Read From the Database /////
@@ -390,7 +386,6 @@ function openingRoll() {
 ///// PHASE 5 /////
 
 function endGame() {
-	console.log('there is a winner!')
 	if (gameData.currentTurn !== myColor) {
 		//unpack data
 		board = unfirebasify(gameData.turnData)
@@ -406,13 +401,13 @@ function endGame() {
 		if (gameData.winner === 'white') {
 			$winnerNameSpan.text(gameData.whiteName)
 			$loserNameSpan.text(gameData.blackName)
-			$pcsHomeSpan.text(gameData.blackPiecesHome)
+			$pcsHomeSpan.text(15 - gameData.blackPiecesHome)
 			$pcsBarSpan.text(gameData.barAtEnd)
 
 		} else {
 			$winnerNameSpan.text(gameData.blackName)
 			$loserNameSpan.text(gameData.whiteName)
-			$pcsHomeSpan.text(gameData.whitePiecesHome)
+			$pcsHomeSpan.text(15 - gameData.whitePiecesHome)
 			$pcsBarSpan.text(gameData.barAtEnd)
 		}
 
@@ -421,11 +416,11 @@ function endGame() {
 	if (!!myColor) {
 		$buttonHolder.append('<button id="play-again">Again</button>')
 		$buttonHolder.append('<button id="leave-game">Quit</button>')
-		$playAgainButton.off()
-		$playAgainButton.addClass('active')
-		$playAgainButton.on('click', function(e){
-			$playAgainButton.off()
-			$playAgainButton.removeClass('active')
+		$('#play-again').off()
+		$('#play-again').addClass('active')
+		$('#play-again').on('click', function(e){
+			$('#play-again').off()
+			$('#play-again').removeClass('active')
 			gameData.controllerToken = 2
 			gameData.currentTurn = null
 			gameData.currentRoll0 = null
@@ -435,14 +430,16 @@ function endGame() {
 			gameData.turnData = null
 			gameData.whitePiecesHome = null
 			gameData.blackPiecesHome = null
+			gameData.winner = null
+			gameData.barAtEnd = null
 
 			databaseRef.set(gameData)
 		})
-		$leaveButton.off()
-		$leaveButton.addClass('active')
-		$leaveButton.on('click', function(e){
-			$leaveButton.off()
-			$leaveButton.removeClass('active')
+		$('#leave-game').off()
+		$('#leave-game').addClass('active')
+		$('#leave-game').on('click', function(e){
+			$('#leave-game').off()
+			$('#leave-game').removeClass('active')
 			gameData.whiteName = ""
 			gameData.blackName = ""
 			gameData.controllerToken = 1
@@ -454,6 +451,8 @@ function endGame() {
 			gameData.turnData = null
 			gameData.whitePiecesHome = null
 			gameData.blackPiecesHome = null
+			gameData.winner = null
+			gameData.barAtEnd = null
 
 			databaseRef.set(gameData)
 		})
@@ -502,24 +501,8 @@ function resetDatabase() {
 	gameData.turnData = null
 	gameData.whitePiecesHome = null
 	gameData.blackPiecesHome = null
-
-	// myColor = 'white'
-	// myName = 'David'
-
-	// theirColor = 'black'
-	// theirName = 'Goliath'
-
-	// gameData.whiteName = "David"
-	// gameData.blackName = "Goliath"
-	// gameData.controllerToken = 3
-	// gameData.currentTurn = 'white'
-	// gameData.whiteOpener = 6
-	// gameData.blackOpener = 2
-
-	// 	$welcomeSetUpModal.removeClass('active-modal')
-	// 		$openingRollModal.removeClass('active-modal')
-	// 	$setUpWrapper.removeClass('active-wrapper')
-	// 		$gameWrapper.addClass('active-wrapper')
+	gameData.barAtEnd = null
+	gameData.winner = null
 
 	databaseRef.set(gameData)
 }
