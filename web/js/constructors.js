@@ -110,6 +110,7 @@ var Turn = function(player) {
 				if (this.doubles) {
 					this.expendedResources.push(this.availableResources.pop())
 				} else {
+console.log("preview moved " + dieUsed + " from available to expended.")
 					this.expendedResources.push(this.availableResources.splice((this.availableResources.indexOf(this.moves[i].dieUsed)), 1)[0])
 				}
 				// splices the given piece from a location, pushes it to the destination
@@ -161,6 +162,7 @@ var Turn = function(player) {
 							if (!isOccupied(projection, preview, this.player) && 
 								projection !== 'overshoot') {
 								possible.push(new Move(preview[point][piece], projection))
+console.log(`added a new move to possible: ${preview.toString()} [ ${point.toString()} ][ ${piece.toString()} ] ${ projection.toString() }`)
 							}
 						} else {
 							if (!isOccupied(projection, preview, this.player) && 
@@ -183,12 +185,10 @@ var Turn = function(player) {
 							// AND the point is not the player's home
 							// unless they are in home stretch
 							if (this.player.homeStretch) {
-								console.log(projection)
-								console.log(preview)
-								console.log(this.player)
 								if (!isOccupied(projection, preview, this.player) && 
 								projection !== 'overshoot') {
 									possible.push(new Move(preview[point][piece], projection))
+console.log(`added a new move to possible: ${preview.toString()} [ ${point.toString()} ][ ${piece.toString()} ] ${ projection.toString() }`)
 								}
 							} else {
 								if (!isOccupied(projection, preview, this.player) && 
