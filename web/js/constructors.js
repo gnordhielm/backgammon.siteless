@@ -1,5 +1,3 @@
-console.log('constructors.js connected')
-
 ///// Object Constructors /////
 
 var Player = function(name, color) {
@@ -109,10 +107,8 @@ var Turn = function(player) {
 				// catalogues the resources used by all the moves
 				if (this.doubles) {
 					this.expendedResources.push(this.availableResources.pop())
-console.log(`preview moved ${this.moves[i].dieUsed} from available to expended.`)
 				} else {
 					this.expendedResources.push(this.availableResources.splice((this.availableResources.indexOf(this.moves[i].dieUsed)), 1)[0])
-console.log(`preview moved ${this.moves[i].dieUsed} from available to expended.`)
 				}
 				// splices the given piece from a location, pushes it to the destination
 				var loc = preview[this.moves[i].location] // ex: preview[point24] - returns an array of pieces
@@ -126,7 +122,7 @@ console.log(`preview moved ${this.moves[i].dieUsed} from available to expended.`
 					preview['bar'].push(theirLoc.splice(theirLocIndex, 1)[0]) // push to the bar
 				}
 			}
-			console.log('Updated preview with ' + this.moves.length.toString() + ' move(s).')
+			console.log('Updated preview with ' + this.moves.length.toString() + ' moves.')
 		} else {
 			console.log('Preview is identical to the board.')	
 		}
@@ -202,7 +198,7 @@ console.log(`preview moved ${this.moves[i].dieUsed} from available to expended.`
 		// sets "objective" board to whatever the preview board is
 		this.updatePreview()
 		board = preview
-		console.log('Committed ' + this.moves.length.toString() + ' move(s).')
+		console.log('Committed ' + this.moves.length.toString() + ' moves.')
 	}
 }
 

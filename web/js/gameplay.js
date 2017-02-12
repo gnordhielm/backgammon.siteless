@@ -1,5 +1,3 @@
-console.log('gameplay.js connected')
-
 ///// Global Variables /////
 
 var board // object which holds the local state of the game

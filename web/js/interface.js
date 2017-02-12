@@ -1,4 +1,3 @@
-console.log('interface.js connected')
 ///// DOM Selectors /////
 
 // Welcome Modal
