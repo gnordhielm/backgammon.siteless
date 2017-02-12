@@ -81,6 +81,7 @@ function firstMove() {
 			// turn off all my event listeners
 			$undoButton.off()
 			$commitButton.off()
+			$commitButton.removeClass('active')
 			// change the dice
 			$dice0.attr('src', './assets/' + them.color + '_naked.png')
 			$dice1.attr('src', './assets/' + them.color + '_naked.png')
@@ -199,6 +200,7 @@ function regularGameplay() {
 				// turn off all my event listeners
 				$undoButton.off()
 				$commitButton.off()
+				$commitButton.removeClass('active')
 				// change the dice
 				$dice0.attr('src', './assets/' + them.color + '_naked.png')
 				$dice1.attr('src', './assets/' + them.color + '_naked.png')
@@ -304,7 +306,7 @@ function moveBuilder() {
 	// end the game from here if someone has won
 	if (thisTurn.player.hasWon) {
 		gameData.winner = thisTurn.player.color
-		gameData.turnBuilder = firebasify(board)
+		gameData.turnData = firebasify(board)
 		gameData.whitePiecesHome = board.point25.length
 		gameData.blackPiecesHome = board.point0.length
 		gameData.barAtEnd = board.bar.length
@@ -320,6 +322,22 @@ function moveBuilder() {
 		// the player hasn't been able to do anything this turn, acknowledge that
 		if (thisTurn.moves.length === 0) {
 			alert('Sorry, ' + thisTurn.player.name + ' there are no possible moves for you.')
+			$undoButton.off()
+			$commitButton.off()
+			// change the dice
+			$dice0.attr('src', './assets/' + them.color + '_naked.png')
+			$dice1.attr('src', './assets/' + them.color + '_naked.png')
+			// commit the preview to the board
+			thisTurn.commitToBoard()
+			// firebasify the board object and set it to gameData.board
+			gameData.turnData = firebasify(board)
+			// clear out the current roll
+			gameData.currentRoll0 = null
+			gameData.currentRoll1 = null
+			// set the current turn to the other player
+			gameData.currentTurn = them.color
+			// commit the changes
+			databaseRef.set(gameData)
 		} else {
 
 			// the player has not used all of their dice
@@ -621,7 +639,6 @@ function projectMove(start, roll, player) {
 			// if the dice equals or is less than the farthest occupied point, return overshoot
 			if (roll <= farthest) {
 				result = 'overshoot'
-			// otherwise, just flatten it to home
 			} else if (blackFictionalPoints.includes(result)) {
 				result = 'point0'
 			} else if (whiteFictionalPoints.includes(result)) {

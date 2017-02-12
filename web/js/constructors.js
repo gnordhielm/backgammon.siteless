@@ -109,9 +109,10 @@ var Turn = function(player) {
 				// catalogues the resources used by all the moves
 				if (this.doubles) {
 					this.expendedResources.push(this.availableResources.pop())
+console.log(`preview moved ${this.moves[i].dieUsed} from available to expended.`)
 				} else {
-console.log("preview moved " + dieUsed + " from available to expended.")
 					this.expendedResources.push(this.availableResources.splice((this.availableResources.indexOf(this.moves[i].dieUsed)), 1)[0])
+console.log(`preview moved ${this.moves[i].dieUsed} from available to expended.`)
 				}
 				// splices the given piece from a location, pushes it to the destination
 				var loc = preview[this.moves[i].location] // ex: preview[point24] - returns an array of pieces
@@ -154,21 +155,18 @@ console.log("preview moved " + dieUsed + " from available to expended.")
 			for (var point in preview) {
 				for (var piece in preview[point]) {
 					if (preview[point][piece].player === this.player) {
-						var projection = projectMove(point, this.availableResources[0], this.player)				
-						// it's possible if the point is not occupied 
-						// AND the point is not the player's home
-						// unless they are in home stretch
-						if (this.player.homeStretch) {
-							if (!isOccupied(projection, preview, this.player) && 
-								projection !== 'overshoot') {
-								possible.push(new Move(preview[point][piece], projection))
-console.log(`added a new move to possible: ${preview.toString()} [ ${point.toString()} ][ ${piece.toString()} ] ${ projection.toString() }`)
-							}
-						} else {
-							if (!isOccupied(projection, preview, this.player) && 
-								projection !== this.player.home) {
-								possible.push(new Move(preview[point][piece], projection))
-							}				
+						var projection = projectMove(point, this.availableResources[0], this.player)		
+						// if the projection returns overshoot, don't add this possible move
+						if (projection === 'overshoot') {
+							continue
+
+						// otherwise, if the player is in the home stretch, make sure they can move home
+						} else if (this.player.homeStretch && !isOccupied(projection, preview, this.player)) {
+							possible.push(new Move(preview[point][piece], projection))
+
+						// if they are not, mak sure they can't
+						} else if (projection !== this.player.home && !isOccupied(projection, preview, this.player)) {
+							possible.push(new Move(preview[point][piece], projection))
 						}
 					}
 				}
@@ -180,22 +178,19 @@ console.log(`added a new move to possible: ${preview.toString()} [ ${point.toStr
 				for (var piece in preview[point]) {
 					if (preview[point][piece].player === this.player) {
 						for (var dice in this.availableResources) {
-							var projection = projectMove(point, this.availableResources[dice], this.player)				
-							// it's possible if the point is not occupied 
-							// AND the point is not the player's home
-							// unless they are in home stretch
-							if (this.player.homeStretch) {
-								if (!isOccupied(projection, preview, this.player) && 
-								projection !== 'overshoot') {
-									possible.push(new Move(preview[point][piece], projection))
-console.log(`added a new move to possible: ${preview.toString()} [ ${point.toString()} ][ ${piece.toString()} ] ${ projection.toString() }`)
-								}
-							} else {
-								if (!isOccupied(projection, preview, this.player) && 
-									projection !== this.player.home) {
-									possible.push(new Move(preview[point][piece], projection))
-								}				
-							}			
+							var projection = projectMove(point, this.availableResources[dice], this.player)		
+							// if the projection returns overshoot, don't add this possible move
+							if (projection === 'overshoot') {
+								continue
+
+							// otherwise, if the player is in the home stretch, make sure they can move home
+							} else if (this.player.homeStretch && !isOccupied(projection, preview, this.player)) {
+								possible.push(new Move(preview[point][piece], projection))
+
+							// if they are not, mak sure they can't
+							} else if (projection !== this.player.home && !isOccupied(projection, preview, this.player)) {
+								possible.push(new Move(preview[point][piece], projection))
+							}		
 						}
 					}
 				}

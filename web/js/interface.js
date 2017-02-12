@@ -444,6 +444,13 @@ function endGame() {
 			$('#leave-game').removeClass('active')
 			$gameEndModal.removeClass('active-modal')
 			$welcomeSetUpModal.addClass('active-modal')
+			$('#your-name').remove()
+			$setUpDiv.append('<form id="setup-form" action="#">\
+				<input id="name-input" type="text" value="">\
+				<input type="submit" id="submit-name"></form>')
+			$opponentName.text('Waiting for opponent...')
+			$yourStatusImg.prop('src', './assets/unready_white.png')
+			$opponentStatusImg.prop('src', './assets/unready_black.png')  
 			gameData.whiteName = ""
 			gameData.blackName = ""
 			gameData.controllerToken = 1
@@ -457,11 +464,11 @@ function endGame() {
 			gameData.blackPiecesHome = null
 			gameData.winner = null
 			gameData.barAtEnd = null
+
 			databaseRef.set(gameData)
 		})
 	}
 }
-
 
 ///// Helper Functions /////
 

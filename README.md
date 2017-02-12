@@ -34,12 +34,12 @@ My **Minimum Viable Product** was a game of backgammon two players could play on
 <img src="./readme-images/wh-piece-home.png" style="height: 20px;">
 
 <img src="./readme-images/board.png" style="width: 150px;">
-<img src="./readme-images/early-browser.png" style="width: 150px;">
 
 ## To Dos
 
 These features aren't essential to the useability of the app, but I'd like to implement them at some point in the future.
 
+* Change alerts to modals - you should be able to see your roll before you find out you have no moves and are a loser.
 * Options for spectators to join a game - at setup or while it's in progress - as spectators.
 * An 'I want to play the next game' button that lets spectators indicate that they'd like to play. The result of a click on that button would be displayed on the game-end modal.
 * Allow users to, after rolling doubles, click and collect many pieces on the same point and deposit them with one click.
