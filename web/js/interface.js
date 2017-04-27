@@ -1,5 +1,4 @@
 ///// DOM Selectors /////
-
 // Welcome Modal
 $welcomeSetUpModal = $('#welcome-setup')
 $setUpDiv = $('#your-setup')
@@ -45,6 +44,7 @@ var gameData
 //		controllerToken - int
 // 		blackName - str
 //		whiteName - str
+//		lastMove - int
 
 // RULE - before you set an event listener to an object, you explicity clear it of event listeners
 
@@ -80,6 +80,22 @@ function dataChangeController(snapshot) {
 	}
 }
 
+///// Just in case: if the game has been sitting unplayed for 45 mins, 
+// give new arrivals the option to clear it out 
+$( document ).ready(() => {
+	setTimeout(() => {
+		if (gameData.lastMove && gameData.lastMove + 2700000 < Date.now()) {
+			var willReset = confirm('The current game has not been touched in 45 minutes, would you like to reset the board?')
+			if (willReset) {
+				resetDatabase()
+				location.reload()
+			}
+		}
+
+	}, 1000)
+})
+
+
 ///// PHASE 1 /////
 
 function setUpGame() {
@@ -88,6 +104,8 @@ function setUpGame() {
 		// the player will commit their name to whiteName
 		$setUpForm.off()
 		$setUpForm.on('submit', function(event) {
+			// Set the lastMove field
+			gameData.lastMove = Date.now()
 			// I have joined the game, set my color and name
 			myColor = "white"
 			theirColor = "black"
@@ -117,6 +135,8 @@ function setUpGame() {
 			$setUpForm.off()
 			// add the listener that commits to black name
 			$setUpForm.on('submit', function(event) {
+				// Set the lastMove field
+				gameData.lastMove = Date.now()
 				// I have joined the game, set my color and name
 				myColor = "black"
 				theirColor = "white"
@@ -186,6 +206,9 @@ function openingRoll() {
 			// when I click on it, roll it, delivering a result
 			$openingWhiteDice.off()
 			$openingWhiteDice.on('click', function(e) {
+
+				// Update the lastMove field
+				gameData.lastMove = Date.now()
 				//roll the dice, set the result appropriately
 				$openingWhiteDice.off()
 				var result = openingDiceAnimate('white')
@@ -208,6 +231,9 @@ function openingRoll() {
 			// when I click on it, roll it, delivering a result
 			$openingWhiteDice.off()
 			$openingWhiteDice.on('click', function(e) {
+
+				// Update the lastMove field
+				gameData.lastMove = Date.now()
 				//roll the dice, set the result appropriately
 				$openingWhiteDice.off()
 				var result = openingDiceAnimate('white')
@@ -280,6 +306,10 @@ function openingRoll() {
 			// when I click on it, roll it, delivering a result
 			$openingBlackDice.off()
 			$openingBlackDice.on('click', function(e) {
+
+
+				// Update the lastMove field
+				gameData.lastMove = Date.now()
 				//roll the dice, set the result appropriately
 				$openingBlackDice.off()
 				var result = openingDiceAnimate('black')
@@ -302,6 +332,10 @@ function openingRoll() {
 			// when I click on it, roll it, delivering a result
 			$openingBlackDice.off()
 			$openingBlackDice.on('click', function(e) {
+
+
+				// Update the lastMove field
+				gameData.lastMove = Date.now()
 				//roll the dice, set the result appropriately
 				$openingBlackDice.off()
 				var result = openingDiceAnimate('black')
@@ -433,6 +467,7 @@ function endGame() {
 			gameData.blackPiecesHome = null
 			gameData.winner = null
 			gameData.barAtEnd = null
+			gameData.lastMove = Date.now()
 
 			databaseRef.set(gameData)
 		})
@@ -463,6 +498,7 @@ function endGame() {
 			gameData.blackPiecesHome = null
 			gameData.winner = null
 			gameData.barAtEnd = null
+			gameData.lastMove = null
 
 			databaseRef.set(gameData)
 		})
@@ -493,11 +529,7 @@ function openingDiceAnimate(color) {
 	}, 100)
 }
 
-function testing() {
-	console.log('testing')
-}
-
-// reset a set of explicitly declared values in the database
+// reset to a set of explicitly declared values in the database
 function resetDatabase() {
 	gameData.whiteName = ""
 	gameData.blackName = ""
@@ -512,6 +544,7 @@ function resetDatabase() {
 	gameData.blackPiecesHome = null
 	gameData.barAtEnd = null
 	gameData.winner = null
+	gameData.lastMove = null
 
 	databaseRef.set(gameData)
 }
