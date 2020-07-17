@@ -1,0 +1,11 @@
+{
+  "name": "app-engine-redirect",
+  "version": "0.0.0",
+  "dependencies": {
+    "express": "4.16.4"
+  },
+  "scripts": {
+    "deploy": "gcloud app deploy --project backgammon-siteless",
+    "start": "node ./index.js"
+  }
+}
