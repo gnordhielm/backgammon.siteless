@@ -51,9 +51,9 @@
   dependencies:
     "@firebase/app-types" "0.x"
 
-"@firebase/database@0.5.3":
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/@firebase/database/-/database-0.5.3.tgz#e731de97f2d12490df1614a86b993e9ab86ed7cb"
+"@firebase/database@0.5.2":
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/@firebase/database/-/database-0.5.2.tgz#9f480c64f7a16569ae8cf18ed82b22acf0ea0885"
   dependencies:
     "@firebase/database-types" "0.4.3"
     "@firebase/logger" "0.1.24"
@@ -75,9 +75,9 @@
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@firebase/firestore-types/-/firestore-types-1.5.0.tgz#f05700220f882773ca01e818bf10b1dc456ee5be"
 
-"@firebase/firestore@1.5.2":
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/@firebase/firestore/-/firestore-1.5.2.tgz#798c6ef541ee982d473d58d0df440bc0381c5f80"
+"@firebase/firestore@1.5.1":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@firebase/firestore/-/firestore-1.5.1.tgz#b494662a68d208d678449460f73437a378fe6167"
   dependencies:
     "@firebase/firestore-types" "1.5.0"
     "@firebase/logger" "0.1.24"
@@ -904,15 +904,15 @@ firebase-functions@3.2.0:
     jsonwebtoken "^8.5.1"
     lodash "^4.17.14"
 
-firebase@^6.6.0:
-  version "6.6.1"
-  resolved "https://registry.yarnpkg.com/firebase/-/firebase-6.6.1.tgz#758beaba5e1729062279b2b288969df2af6f94f8"
+firebase@6.6.0:
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/firebase/-/firebase-6.6.0.tgz#4890fa40ef4757dec9cb8524b17a0ed19ceb894e"
   dependencies:
     "@firebase/app" "0.4.16"
     "@firebase/app-types" "0.4.3"
     "@firebase/auth" "0.12.0"
-    "@firebase/database" "0.5.3"
-    "@firebase/firestore" "1.5.2"
+    "@firebase/database" "0.5.2"
+    "@firebase/firestore" "1.5.1"
     "@firebase/functions" "0.4.17"
     "@firebase/installations" "0.2.6"
     "@firebase/messaging" "0.4.10"
@@ -1365,8 +1365,8 @@ lodash.once@^4.0.0:
   resolved "https://registry.yarnpkg.com/lodash.once/-/lodash.once-4.1.1.tgz#0dd3971213c7c56df880977d504c88fb471a97ac"
 
 lodash@^4.17.14, lodash@^4.17.5:
-  version "4.17.15"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
 
 long@^4.0.0:
   version "4.0.0"
